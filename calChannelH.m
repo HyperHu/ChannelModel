@@ -1,4 +1,4 @@
-function [theH_d] = calChannelH(rayList, distD, mu, nData)
+function [theH_d] = calChannelH(rayList, distD, mu, nData, simulationTimeMs)
 %CALCHANNELH 此处显示有关此函数的摘要
 %   此处显示详细说明
 
@@ -13,13 +13,13 @@ nCP_Extra = (sampleRate * subFrameDuration - nCP_Normal * (numSymbolPerSubFrame 
 nCP_Normal = nCP_Normal - nFFT;
 nCP_Extra = nCP_Extra - nFFT;
 nCP_List = [nCP_Extra, nCP_Normal * ones(1, numSymbolPerSubFrame/2 - 1)];
-nCP_List = [nCP_List nCP_List];
+nCP_List = repmat(nCP_List, 1, 2 * simulationTimeMs);
 
 %%
-theH_d = zeros(nData, numSymbolPerSubFrame);
-n0 = zeros(1, numSymbolPerSubFrame);
+theH_d = zeros(nData, numSymbolPerSubFrame*simulationTimeMs);
+n0 = zeros(1, numSymbolPerSubFrame*simulationTimeMs);
 wn = 2*pi/nFFT;
-for sym = 1:numSymbolPerSubFrame
+for sym = 1:numSymbolPerSubFrame*simulationTimeMs
     n0(sym) = nFFT * (sym-1) + sum(nCP_List(1:sym));
 end
 for idxRay = 1:size(rayList,1)

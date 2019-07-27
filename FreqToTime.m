@@ -6,7 +6,7 @@ function [timeData] = FreqToTime(freqData, mu)
 subFrameDuration = 1e-3;
 subCarriarSpace = (15 * 1e3) * (2 ^ mu);
 numSymbolPerSubFrame = 14 * (2 ^ mu);
-assert(size(freqData, 2) == numSymbolPerSubFrame);
+simulationTimeMs = size(freqData, 2) / numSymbolPerSubFrame;
 nData = size(freqData, 1);
 nFFT = 2 ^ ceil(log2(nData));
 sampleRate = nFFT * subCarriarSpace;
@@ -15,12 +15,12 @@ nCP_Extra = (sampleRate * subFrameDuration - nCP_Normal * (numSymbolPerSubFrame 
 nCP_Normal = nCP_Normal - nFFT;
 nCP_Extra = nCP_Extra - nFFT;
 nCP_List = [nCP_Extra, nCP_Normal * ones(1, numSymbolPerSubFrame/2 - 1)];
-nCP_List = [nCP_List nCP_List];
+nCP_List = repmat(nCP_List, 1, 2 * simulationTimeMs);
 
 %%
-timeData = zeros(1, sampleRate * subFrameDuration);
+timeData = zeros(1, sampleRate * subFrameDuration * simulationTimeMs);
 sIdx = 1;
-for sym = 1:numSymbolPerSubFrame
+for sym = 1:numSymbolPerSubFrame * simulationTimeMs
     X = [freqData(1:nData/2, sym); zeros(nFFT-nData, 1); freqData(nData/2+1 : nData, sym)];
     x = ifft(X) * sqrt(nFFT);
     xAll = [x(nFFT-nCP_List(sym)+1:nFFT); x];
@@ -30,6 +30,3 @@ for sym = 1:numSymbolPerSubFrame
 end
 end
 
-% 
-% sig1 = ifft(ifftshift([zeros(1, (fftSize - dataSize)/2) oriData zeros(1, (fftSize - dataSize)/2)]) * sqrt(fftSize));
-%     sampleList = [sig1(fftSize-cpLen+1:end) sig1];

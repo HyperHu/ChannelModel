@@ -12,15 +12,15 @@ sampleRate = nFFT * subCarriarSpace;
 
 
 %%
-rayList = genRandomRay(10, 0, (200/sampleRate)*1e9, 5*1000, 2*pi);
-%rayList(:,3) = subCarriarSpace * 0.1;
-distDRange = -10:10;
-stdList = zeros(1, size(distDRange, 2));
-for idx = 1:size(distDRange,2)
-    theChannel = calChannelH(rayList, distDRange(idx), mu, nData);
-    stdList(idx) = mag2db(std(reshape(real(theChannel), 1, [])));
-end
-stem(distDRange, stdList); hold on; grid on;
+% rayList = genRandomRay(10, 0, (200/sampleRate)*1e9, 5*1000, 2*pi);
+% %rayList(:,3) = subCarriarSpace * 0.1;
+% distDRange = -10:10;
+% stdList = zeros(1, size(distDRange, 2));
+% for idx = 1:size(distDRange,2)
+%     theChannel = calChannelH(rayList, distDRange(idx), mu, nData);
+%     stdList(idx) = mag2db(std(reshape(real(theChannel), 1, [])));
+% end
+% stem(distDRange, stdList); hold on; grid on;
 
 %%
 rayList = genRandomRay(20, 0, (200/sampleRate)*1e9, 5*1000, 2*pi);

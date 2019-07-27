@@ -5,7 +5,7 @@ function [outSym, signal, initPhase] = throughChannel_OneRay_FreqSym(inSym, mu, 
 subFrameDuration = 1e-3;
 subCarriarSpace = (15 * 1e3) * (2 ^ mu);
 numSymbolPerSubFrame = 14 * (2 ^ mu);
-assert(size(inSym, 2) == numSymbolPerSubFrame);
+simulationTimeMs = size(inSym, 2) / numSymbolPerSubFrame;
 nData = size(inSym, 1);
 nFFT = 2 ^ ceil(log2(nData));
 sampleRate = nFFT * subCarriarSpace;
@@ -14,7 +14,7 @@ nCP_Extra = (sampleRate * subFrameDuration - nCP_Normal * (numSymbolPerSubFrame 
 nCP_Normal = nCP_Normal - nFFT;
 nCP_Extra = nCP_Extra - nFFT;
 nCP_List = [nCP_Extra, nCP_Normal * ones(1, numSymbolPerSubFrame/2 - 1)];
-nCP_List = [nCP_List nCP_List];
+nCP_List = repmat(nCP_List, 1, 2 * simulationTimeMs);
 
 %%
 scaler = db2mag(0 - powerLoss_dB);
@@ -30,10 +30,10 @@ hWin = min(hWin*10, hMargin-1);
 %assert(hMargin > hWin)
 
 %%
-outSym = zeros(nData, numSymbolPerSubFrame);
-signal = zeros(nData, numSymbolPerSubFrame);
-initPhase = zeros(1, numSymbolPerSubFrame);
-for sym = 1:numSymbolPerSubFrame
+outSym = zeros(nData, numSymbolPerSubFrame*simulationTimeMs);
+signal = zeros(nData, numSymbolPerSubFrame*simulationTimeMs);
+initPhase = zeros(1, numSymbolPerSubFrame*simulationTimeMs);
+for sym = 1:numSymbolPerSubFrame*simulationTimeMs
     n0 = nFFT * (sym-1) + sum(nCP_List(1:sym));
     initPhi = exp(1i * (wn * kds * n0 + randomPhase_rad));
     initPhase(1, sym) = initPhi;
