@@ -71,13 +71,13 @@ tmpData_Freq = rcvDataViaFreq ./ oriData;
 tmpData_H = theChannel_0;
 
 figure(31); hold on; grid on;
-corrDataTime = CalCorrMat(tmpData_Time, 200, 30);
+corrDataTime = CalCorrMat(tmpData_Time, 200, 30, 1, 1);
 mesh(abs(corrDataTime));
 
 figure(32); hold on; grid on;
-corrDataH = CalCorrMat(tmpData_H, 200, 30);
+corrDataH = CalCorrMat(tmpData_H, 200, 30, 1, 1);
 mesh(abs(corrDataH));
 
 figure(33); hold on; grid on;
-corrDataIci = CalCorrMat(tmpData_Freq-tmpData_H, 200, 30);
+corrDataIci = CalCorrMat(tmpData_Freq-tmpData_H, 200, 30, 1, 1);
 mesh(abs(corrDataIci));
