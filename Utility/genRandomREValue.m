@@ -1,4 +1,4 @@
-function [reMat, bitData] = genRandomREValue(nRE, nSymbol, modulateOrder)
+function [reMat, bitData] = genRandomREValue(nRE, nSymbol, modulateOrder, sigmaRE)
 
 switch (modulateOrder)
     case 2
@@ -14,7 +14,9 @@ switch (modulateOrder)
 end
 
 bitData = randi([0 1], nRE*nSymbol*modulateOrder, 1);
-reMat = reshape(nrSymbolModulate(bitData, mod), nRE, []);
+% reMat = reshape(nrSymbolModulate(bitData, mod), nRE, []);
+reMat = reshape(lteSymbolModulate(bitData, mod), nRE, []);
+reMat = reMat * sigmaRE;
 end
 
 %%% test for nrSymbolModulate and nrSymbolDemodulate.
