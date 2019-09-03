@@ -1,18 +1,18 @@
-% This script show the distribution of time domain complex value.
+% This script show the distribution of time domain complex value (sample).
 % The Standard Deviation per RE is sigmaRe, with modulateOrder modulation.
-% Then, the time domain complex value (named as sample) is follow a complex
-% gaussion distribution. Further, magnitude of sample is follow rayleigh
-% distribution. 
+% Then, the sample followed a complex gaussion distribution.
+% Further, magnitude of sample followed rayleigh distribution. 
+% And, power of sample followed Chi-squared distribution with k=2 freedom.
 
 %% parameter set
 clear all;
 addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
-modulateOrder = 8;
+modulateOrder = 6;
 sigmaRe = 1;
 nSymbol = 14 * 1000;
-nRE = 2048;
+nRE = 12 * 100;
 nFFT = 2 ^ ceil(log2(nRE));
 
 %% random data and do statistic
@@ -33,7 +33,12 @@ sigmaSampleRealEst = std(real(timeSig), 0, 'all');
 sigmaSampleImagEst = std(imag(timeSig), 0, 'all');
 sigmaSampleEst = std(timeSig, 0, 'all');
 
-%% display and plot
+% Chi-squared distribution is a special case of gamma distribution.
+pdSamplePow = fitdist(reshape(abs(timeSig) .^ 2, [], 1), 'gamma');
+meanPower = mean(pdSamplePow);
+maxPower_9997 = icdf(pdSamplePow, 0.9997); % 99.97%
+maxPower_sample = max(reshape(abs(timeSig) .^ 2, [], 1));
+%%% display and plot
 disp("=================== RE info ===================================");
 fprintf('The statistics of RE is [%.4f; %.4f]\n', muReEst, sigmaReEst);
 fprintf('RE real part is [%.4f; %.4f]\n', muReRealEst, sigmaReRealEst);
@@ -43,11 +48,13 @@ disp("=================== Sample info ===================================");
 fprintf('The statistics of sample is [%.4f; %.4f]\n', muSampleEst, sigmaSampleEst);
 fprintf('RE real part is [%.4f; %.4f]\n', muSampleRealEst, sigmaSampleRealEst);
 fprintf('RE imag part is [%.4f; %.4f]\n', muSampleImagEst, sigmaSampleImagEst);
-
 fprintf('[%.4f, (%.4f, %.4f)] = %.4f\n', sigmaSampleEst/sigmaReEst,...
         sigmaSampleRealEst/sigmaReRealEst, sigmaSampleImagEst/sigmaReImagEst,...
         sqrt(nRE/nFFT));
-
+fprintf('The mean Power is %.4f, the max power is %.4f\n',...
+        meanPower, maxPower_sample);
+fprintf('The PAPR is %.4f, 99.97%% will not exceed %.4f\n',...
+        pow2db(maxPower_sample/meanPower), maxPower_9997);
 %%
 figure(1); hold on; grid on;
 histogram(reshape(real(reMat), 1, []), 100);
@@ -62,8 +69,6 @@ figure(4); hold on; grid on;
 histfit(reshape(abs(timeSig), 1, []), 100, 'rayleigh');
 
 figure(5); hold on; grid on;
-histfit(reshape(abs(timeSig) .^ 2, 1, []), 100, 'weibull');
-pdSampleReal = fitdist(reshape(abs(timeSig) .^ 2, [], 1), 'weibull');
-pow2db(icdf(pdSampleReal, 0.997) / mean(pdSampleReal))
+histfit(reshape(abs(timeSig) .^ 2, 1, []), 100, 'gamma');
 
 
