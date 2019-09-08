@@ -4,7 +4,7 @@ clear all;
 addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
-pList = 0:0.005:0.5;
+pList = 0:0.001:0.25;
 nList = 1:20;
 resultGain = zeros(size(pList,2), size(nList,2));
 for idxP = 1:size(pList,2)
@@ -13,7 +13,7 @@ for idxP = 1:size(pList,2)
     end
 end
 
-figure(); mesh(nList, pList, resultGain)
+figure(); mesh(nList, pList, max(-3, resultGain));
 
 %%
 function gain = calCombineGain(N, phiDiff)
@@ -26,5 +26,5 @@ function gain = calCombineGain(N, phiDiff)
     rcvSig = mean(tmpSig + tmpNoise, 2);
     rcvNoisePow = mean(abs(rcvSig - realSig) .^ 2);
     realSigPow = mean(abs(realSig) .^ 2);
-    gain = max(pow2db(realSigPow / rcvNoisePow) - rawSNR_dB, -20);
+    gain = pow2db(realSigPow / rcvNoisePow) - rawSNR_dB;
 end
