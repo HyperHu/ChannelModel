@@ -5,38 +5,25 @@ addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
 modulateOrder = 8;
-nSymbol = 14 * 100;
-nFFT = 4096;
+nFFT = 2048;
+nSymbol = 14 * 10;
 
-kdsList = 0.01:0.05:0.5;
+
+kdsList = 0.01:0.025:0.5;
 resultS = zeros(size(kdsList));
 resultSigma = zeros(size(kdsList));
 for idxI = 1:size(kdsList,2)
     idxI
     [tmpS, tmpSigma] = calRicianPara(nFFT, nSymbol, kdsList(idxI), modulateOrder);
     resultS(idxI) = tmpS;
-    resultSigma(idxI) = tmpSigma;
+    resultSigma(idxI) = tmpSigma * sqrt(2);
 end
 
 figure(1); hold on; grid on;
 plot(kdsList, resultS, '*--');
 plot(kdsList, resultSigma, 'o--');
-plot(kdsList, sqrt(resultS .^ 2 + 2*(resultSigma .^ 2)));
+%plot(kdsList, sqrt(resultS .^ 2 + 2*(resultSigma .^ 2)));
 
-modulateOrder = 2;
-resultS = zeros(size(kdsList));
-resultSigma = zeros(size(kdsList));
-for idxI = 1:size(kdsList,2)
-    idxI
-    [tmpS, tmpSigma] = calRicianPara(nFFT, nSymbol, kdsList(idxI), modulateOrder);
-    resultS(idxI) = tmpS;
-    resultSigma(idxI) = tmpSigma;
-end
-
-figure(1); hold on; grid on;
-plot(kdsList, resultS, '*--');
-plot(kdsList, resultSigma, 'o--');
-plot(kdsList, sqrt(resultS .^ 2 + 2*(resultSigma .^ 2)));
 
 %% random data and do statistic
 % sumIci = zeros(nFFT, nSymbol);
@@ -64,19 +51,19 @@ plot(kdsList, sqrt(resultS .^ 2 + 2*(resultSigma .^ 2)));
 function [iciS, iciSig] = calRicianPara(nFFT, nSymbol, kds, modulateOrder)
 sumIci = zeros(nFFT, nSymbol);
 [reMatPilot,~] = genRandomREValue(nFFT, nSymbol, 2, 1);
-for idxD = 1:24
+for idxD = 1:36
     [reMatData,~] = genRandomREValue(nFFT, nSymbol, modulateOrder, 1);
     tmpI = reMatData ./ reMatPilot;
-    tmpP = calPhaseFactor(nFFT, zeros(1,nSymbol), 0, 0, kds, idxD);
+    tmpP = calPhaseFactor(nFFT, zeros(1,nSymbol), 0, 10, kds, idxD);
     tmpIci = calIciFactor(idxD, kds, nFFT);
     sumIci = sumIci + tmpI .* tmpP .* tmpIci;
     [reMatData,~] = genRandomREValue(nFFT, nSymbol, modulateOrder, 1);
     tmpI = reMatData ./ reMatPilot;
-    tmpP = calPhaseFactor(nFFT, zeros(1,nSymbol), 0, 0, kds, -idxD);
+    tmpP = calPhaseFactor(nFFT, zeros(1,nSymbol), 0, 10, kds, -idxD);
     tmpIci = calIciFactor(-idxD, kds, nFFT);
     sumIci = sumIci + tmpI .* tmpP .* tmpIci;
 end
-sumIci = sumIci ./ abs(calIciFactor(0, kds, nFFT));
+%sumIci = sumIci ./ abs(calIciFactor(0, kds, nFFT));
 pdICI = fitdist(reshape(abs(sumIci), [], 1), 'rician');
 iciS = pdICI.s;
 iciSig = pdICI.sigma;
