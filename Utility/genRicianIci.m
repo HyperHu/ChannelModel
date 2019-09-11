@@ -4,6 +4,7 @@ theIciFactor_0 = abs(calIciFactor(0, abs(kds), nFFT));
 scaler = db2mag(0 - powerLoss_dB);
 v = scaler * theIciFactor_1;
 sig = scaler * sqrt(1 - theIciFactor_0^2 - theIciFactor_1^2);
-iciMat = random('rician', v, sig/sqrt(2), [nFFT, nSym]);
+tmpPhase = exp(1i * rand(nFFT, nSym) * 2*pi);
+iciMat = random('rician', v, sig/sqrt(2), [nFFT, nSym]) .* tmpPhase;
 end
 
