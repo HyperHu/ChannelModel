@@ -8,7 +8,7 @@ clear all;
 addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
-simulationTimeMs = 50; %ms;
+simulationTimeMs = 100; %ms;
 mu = 1;
 numPRB = 100;
 nFFT = 2 ^ ceil(log2(numPRB * 12));
@@ -26,7 +26,7 @@ nData = numPRB * 12;
 % aoa_deg\zoa_deg:
 
 %theRay = genRandomRay(1, 0, (4/sampleRate)*1e9, 1, 0);
-theRay = [0, (2/sampleRate)*1e9, 15000, 0];
+theRay = [0, (10/sampleRate)*1e9, 1500, 0];
 
 %% calculate H[k,l], it is ideal, means no noise, no ICI.
 theChannel_ideal = calChannelH(theRay, 0, mu, nFFT, simulationTimeMs);
@@ -34,19 +34,13 @@ theChannel_ideal = calChannelH(theRay, 0, mu, nFFT, simulationTimeMs);
 %figure(2); mesh(angle(theChannel_ideal));
 
 %% calculate ICI[k,l]
-nSymbol = size(theChannel_ideal,2);
-theICI = zeros(size(theChannel_ideal));
-for distD = 1:50
-    [reMat,~] = genRandomREValue(nFFT, nSymbol, 8, 1);
-    theICI = theICI + (calChannelH(theRay, distD, mu, nFFT, simulationTimeMs) .* reMat);
-    [reMat,~] = genRandomREValue(nFFT, nSymbol, 8, 1);
-    theICI = theICI + (calChannelH(theRay, -distD, mu, nFFT, simulationTimeMs) .* reMat);
-end
+nSym = size(theChannel_ideal,2);
+[theICI, v, sig] = genRicianIci(nFFT, nSym, theRay(1,1), theRay(1,3)/subCarriarSpace);
 %figure(1); mesh(abs(theICI));
 %figure(2); mesh(angle(theICI));
 figure(3); grid on; histfit(reshape(abs(theICI), 1, []), 100, 'rician');
 %%
-pdICI = fitdist(reshape(abs(theICI), [], 1), 'rician')
+%pdICI = fitdist(reshape(abs(theICI), [], 1), 'rician')
 
 
 %%

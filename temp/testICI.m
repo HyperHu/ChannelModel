@@ -16,7 +16,7 @@ for idxI = 1:size(nFFTList,2)
         dList = -36:36;
         tmpV = zeros(1,size(dList,2));
         for idxK = 1:size(tmpV,2)
-            tmpV(idxK) = normal_freqShift(dList(idxK), kdsList(idxJ), nFFTList(idxI));
+            tmpV(idxK) = quick_freqShift(dList(idxK), kdsList(idxJ), nFFTList(idxI));
         end
         %norm(tmpV)
         s(idxI,idxJ) = abs(tmpV(36+1));
@@ -39,24 +39,24 @@ iPow = v.^2 + sig.^2;
 plot(kdsList, pow2db(sPow ./ iPow));
 
 %%
-% nFFT = 2048;
-% k_dsList = -0.5:0.01:0.49;
-% dList = -36:36;
-% ans1 = zeros(73,100);
-% ans2 = zeros(73,100);
-% for idx = 1:73
-%     for idxi = 1:100
-%         ans1(idx,idxi) = quick_freqShift(dList(idx), k_dsList(idxi), nFFT);
-%         ans2(idx,idxi) = quick_freqShift(dList(idx), k_dsList(idxi), nFFT/8);
-%     end
-% end
-% 
-% figure();
-% mesh(k_dsList, dList, abs(ans1));
-% figure();
-% mesh(k_dsList, dList, abs(ans2));
-% figure();
-% mesh(k_dsList, dList, abs(ans1 - ans2));
+nFFT = 2048;
+k_dsList = -0.5:0.01:0.49;
+dList = -36:36;
+ans1 = zeros(73,100);
+ans2 = zeros(73,100);
+for idx = 1:73
+    for idxi = 1:100
+        ans1(idx,idxi) = quick_freqShift(dList(idx), k_dsList(idxi), nFFT);
+        ans2(idx,idxi) = quick_freqShift(dList(idx), k_dsList(idxi), nFFT/8);
+    end
+end
+
+figure();
+mesh(k_dsList, dList, abs(ans1));
+figure();
+mesh(k_dsList, dList, abs(ans2));
+figure();
+mesh(k_dsList, dList, abs(ans1 - ans2));
 
 
 function theFilterFactor = quick_freqShift(d, k_ds, nFFT)
