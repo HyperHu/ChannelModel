@@ -4,7 +4,7 @@ clear all;
 addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
-modulateOrder = 8;
+modulateOrder = 2;
 nFFT = 2048;
 nSymbol = 14 * 100;
 
