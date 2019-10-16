@@ -8,8 +8,8 @@ clear all;
 addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
-simulationTimeMs = 20; %ms;
-mu = 0;
+simulationTimeMs = 100; %ms;
+mu = 1;
 numPRB = 20;
 nFFT = 2 ^ ceil(log2(numPRB * 12));
 nData = numPRB * 12;
@@ -26,12 +26,23 @@ nData = numPRB * 12;
 % aoa_deg\zoa_deg:
 
 %theRay = genRandomRay(1, 0, (4/sampleRate)*1e9, 1, 0);
-theRay = [0, (5/sampleRate)*1e9, subCarriarSpace/64, 0];
+%theRay = [0, (5/sampleRate)*1e9, subCarriarSpace/64, 0];
+theRay = [0, (1/sampleRate)*1e9, subCarriarSpace/128, 0];
 
 %% calculate H[k,l], it is ideal, means no noise, no ICI.
 theChannel_ideal = calChannelH(theRay, 0, mu, nFFT, simulationTimeMs);
 %figure(1); mesh(abs(theChannel_ideal));
 %figure(2); mesh(angle(theChannel_ideal));
+
+% figure(1); hold on; grid on;
+% plot((-nFFT/2 : nFFT/2-1), abs(theChannel_ideal(:,1)), '*');
+% figure(2); hold on; grid on;
+% plot((-nFFT/2 : nFFT/2-1), angle(theChannel_ideal(:,1)), 'o');
+
+figure(1); hold on; grid on;
+plot(abs(theChannel_ideal(1,:)), '*');
+figure(2); hold on; grid on;
+plot(angle(theChannel_ideal(1,:)), 'o');
 
 %% calculate ICI[k,l]
 nSym = size(theChannel_ideal,2);

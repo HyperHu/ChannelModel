@@ -9,7 +9,7 @@ clear all;
 addpath(pwd + "\..");
 addpath(pwd + "\..\Utility");
 
-modulateOrder = 6;
+modulateOrder = 2;
 sigmaRe = 1;
 nSymbol = 14 * 1000;
 nRE = 12 * 100;
@@ -18,7 +18,10 @@ nFFT = 2 ^ ceil(log2(nRE));
 %% random data and do statistic
 [reMat,~] = genRandomREValue(nRE, nSymbol, modulateOrder, sigmaRe);
 timeSig = FreqToTime(reMat, 1);
+figure(20); hold on; grid on;
+plot(reshape(real(reMat), 1, []), reshape(imag(reMat), 1, []), '*')
 
+%%
 muReRealEst = mean(real(reMat), 'all');
 muReImagEst = mean(imag(reMat), 'all');
 muReEst = mean(reMat, 'all');
@@ -37,7 +40,9 @@ sigmaSampleEst = std(timeSig, 0, 'all');
 pdSamplePow = fitdist(reshape(abs(timeSig) .^ 2, [], 1), 'gamma');
 meanPower = mean(pdSamplePow);
 maxPower_9997 = icdf(pdSamplePow, 0.9997); % 99.97%
+maxPower_Cal = icdf(pdSamplePow, 1 - 1/size(timeSig,2)); % 99.97%
 maxPower_sample = max(reshape(abs(timeSig) .^ 2, [], 1));
+
 %%% display and plot
 disp("=================== RE info ===================================");
 fprintf('The statistics of RE is [%.4f; %.4f]\n', muReEst, sigmaReEst);
@@ -51,9 +56,9 @@ fprintf('RE imag part is [%.4f; %.4f]\n', muSampleImagEst, sigmaSampleImagEst);
 fprintf('[%.4f, (%.4f, %.4f)] = %.4f\n', sigmaSampleEst/sigmaReEst,...
         sigmaSampleRealEst/sigmaReRealEst, sigmaSampleImagEst/sigmaReImagEst,...
         sqrt(nRE/nFFT));
-fprintf('The mean Power is %.4f, the max power is %.4f\n',...
-        meanPower, maxPower_sample);
-fprintf('The PAPR is %.4f, 99.97%% will not exceed %.4f\n',...
+fprintf('The mean Power is %.4f, the max power is %.4f, %.4f\n',...
+        meanPower, maxPower_sample, maxPower_Cal);
+fprintf('The PAPR is %.4f dB, 99.97%% will not exceed %.4f\n',...
         pow2db(maxPower_sample/meanPower), maxPower_9997);
 %%
 figure(1); hold on; grid on;
@@ -66,9 +71,11 @@ figure(3); hold on; grid on;
 histfit(reshape(real(timeSig), 1, []), 100);
 histfit(reshape(imag(timeSig), 1, []), 100);
 figure(4); hold on; grid on;
-histfit(reshape(abs(timeSig), 1, []), 100, 'rayleigh');
+timeSig(1) = 12;
+histfit(reshape(abs(timeSig), 1, []), 500, 'rayleigh');
+%histogram(reshape(abs(timeSig), 1, []), (0:0.05:5));
 
-figure(5); hold on; grid on;
-histfit(reshape(abs(timeSig) .^ 2, 1, []), 100, 'gamma');
+%figure(5); hold on; grid on;
+%histfit(reshape(abs(timeSig) .^ 2, 1, []), 100, 'gamma');
 
 

@@ -19,14 +19,15 @@ nSymbol = 14 * 500;
 %     resultSigma(idxI) = tmpSigma * sqrt(2);
 % end
 % 
-% figure(1); hold on; grid on;
-% plot(kdsList, resultS, '*--');
-% plot(kdsList, resultSigma, 'o--');
-% %plot(kdsList, sqrt(resultS .^ 2 + 2*(resultSigma .^ 2)));
+
+figure(1); hold on; grid on;
+plot(kdsList, resultS, '*--');
+plot(kdsList, resultSigma, 'o--');
+%plot(kdsList, sqrt(resultS .^ 2 + 2*(resultSigma .^ 2)));
 
 
 %% random data and do statistic
-kds = 0.5/8;
+kds = 0.5/1000;
 sumIci = zeros(nFFT, nSymbol);
 for idxD = 1:24
     [reMatData,~] = genRandomREValue(nFFT, nSymbol, modulateOrder, 1);
