@@ -7,7 +7,7 @@ for idx = 1:size(xList,2)
         xList(idx) = 0.00001;
     end
 end
-tmpP = exp(1i * pi * (nFFT - 1) / nFFT * xList);
+tmpP = exp(1i * pi * xList * ((nFFT - 1) / nFFT));
 tmpA = sin(pi * xList) ./ sin(pi * xList / nFFT) ./ nFFT;
 factorList = tmpP .* tmpA;
 
