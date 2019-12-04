@@ -1,4 +1,4 @@
-function theBler = calBler(mcsIdx, snrdB, nSample)
+function theBler = calBler(mcsIdx, snrdB, nPrb, nSample)
 ModulationOrder_Table = {'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' ...
                          '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' ...
                          '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' ...
@@ -15,7 +15,6 @@ BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
                        8, 8, 8, 8, 8, 8, 8, 8];
 
 %%
-    nPrb = 20;
     nSymbol = 12;
     pdsch = struct();
     pdsch.NLayers = 1;
