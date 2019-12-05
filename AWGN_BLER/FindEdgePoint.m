@@ -43,4 +43,10 @@ for nPrbIdx = 1:size(nPRB_list,2)
     save("ep_list_PRB"+nPRB_list(nPrbIdx), "ep_list", "nPrb");
 end
 
-
+%%
+figure(); hold on; grid on;
+for nPrbIdx = 1:size(nPRB_list,2)
+    load("ep_list_PRB"+nPRB_list(nPrbIdx), "ep_list");
+    plot(SpectralEfficiency_Table, ep_list(:,1), '--');
+    plot(SpectralEfficiency_Table, ep_list(:,2), '.-');
+end
