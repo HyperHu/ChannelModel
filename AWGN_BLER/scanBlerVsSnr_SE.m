@@ -7,75 +7,43 @@ SpectralEfficiency_Table = [0.0586 0.0781 0.0977 0.125 0.1523 0.1934 0.2344 0.30
                             5.332 5.5547 5.8906 6.2266 6.5703 6.9141 7.1602 7.4063];
 
 %%
-if (1)
-    load("cp_list_base.mat");
-    %load("temp23_RawData.mat");
-else
-    cp_list = zeros(size(SpectralEfficiency_Table, 2), 2);
-    for idx = 1:size(SpectralEfficiency_Table, 2)
-        %tmpX = (sqrt(SpectralEfficiency_Table(idx)) - 0.24) / 0.07085;
-        cp_list(idx,1) = -15;
-        cp_list(idx,2) = 30;
-    end
-end
-
-%%
-ddd = 1;
-while (ddd > 0.01)
+nPRB_list = [5 10 20 50 100 200];
+for nPrbIdx = 1:size(nPRB_list,2)
+    load("ep_list_PRB"+nPRB_list(nPrbIdx), "ep_list", "nPrb");
+    ddd = 0.05;
     snrdB_List = -15:ddd:30;
     blerMatrix = zeros(size(SpectralEfficiency_Table, 2), size(snrdB_List,2));
+    
+    tic
     for seIdx = 1:size(blerMatrix,1)
-        tic
         disp(seIdx);
-        tmpFlag = true;
         for snrIdx = 1:size(blerMatrix,2)
-            if (snrdB_List(snrIdx) < cp_list(seIdx,1))
+            if (snrdB_List(snrIdx) < ep_list(seIdx,1))
                 blerMatrix(seIdx, snrIdx) = 1;
                 continue;
             end
-            if (snrdB_List(snrIdx) > cp_list(seIdx,2))
+            if (snrdB_List(snrIdx) > ep_list(seIdx,2))
                 break;
             end
-            blerMatrix(seIdx, snrIdx) = calBler(seIdx, snrdB_List(snrIdx), 20, 10);
-            
-            if ((blerMatrix(seIdx, snrIdx) < 1) && (tmpFlag == true))
-                cp_list(seIdx,1) = snrdB_List(snrIdx) - 3 * ddd;
-                tmpFlag = false;
-            end
-            if (blerMatrix(seIdx, snrIdx) > 0)
-                cp_list(seIdx,2) = snrdB_List(snrIdx) + 3 * ddd;
-            end
+            blerMatrix(seIdx, snrIdx) = calBler(seIdx, snrdB_List(snrIdx), nPrb, 5000);
         end
-        toc
     end
-   ddd = ddd / 10; 
+    toc
+    
+    save("blerMatrix_5KSample_PRB"+nPRB_list(nPrbIdx),...
+         "blerMatrix", "snrdB_List", "nPrb");
 end
 
 %%
-% snrdB_List = -20:1:30;
-% blerMatrix = zeros(size(SpectralEfficiency_Table, 2), size(snrdB_List,2));
-% for seIdx = 1:size(blerMatrix,1)
-%     tic
-%     disp(seIdx);
-%     for snrIdx = 1:size(blerMatrix,2)
-%         blerMatrix(seIdx, snrIdx) = calBler(seIdx, snrdB_List(snrIdx), 10);
-%         if (blerMatrix(seIdx, snrIdx) == 0)
-%             break;
-%         end
-%     end
-%     toc
+% figure(1); hold on; grid on;
+% mesh(snrdB_List, sqrt(SpectralEfficiency_Table), blerMatrix);
+
+%%
+% figure(2);
+% for idx = 1:size(blerMatrix,1)
+%     plot(snrdB_List, blerMatrix(idx,:), '*--'); hold on; grid on;
 % end
 
-%%
-figure(1); hold on; grid on;
-mesh(snrdB_List, sqrt(SpectralEfficiency_Table), blerMatrix);
 
-%%
-figure(2);
-for idx = 1:size(blerMatrix,1)
-    plot(snrdB_List, blerMatrix(idx,:), '*--'); hold on; grid on;
-end
-
-save("temp_10Sample_20PRB_RawData.mat");
 
 
