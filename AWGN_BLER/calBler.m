@@ -25,38 +25,32 @@ BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
     pdsch.nPrb = nPrb;
     pdsch.nSymbol = nSymbol;
 
+    trBlkLen = hPDSCHTBS(pdsch, 12*pdsch.nSymbol);
+    outlen = 12 * pdsch.nSymbol * pdsch.nPrb * pdsch.BitsPerSymbol;
+    rv = 0;
+    encDL = nrDLSCH('TargetCodeRate', pdsch.TargetCodeRate);
+    decDL = nrDLSCHDecoder('TargetCodeRate', pdsch.TargetCodeRate, ...
+                           'TransportBlockLength', trBlkLen);
+    
 %%
-    %tic
     totalErr = 0;
     for iii = 1:nSample
-        if doTransmmit(pdsch, snrdB) == true
+        encDL.reset();
+        decDL.reset();
+        setTransportBlock(encDL,randi([0 1],trBlkLen,1,'int8'));
+        codedTrBlock = encDL(pdsch.Modulation, pdsch.NLayers, outlen, rv);
+        txSoftBits = nrSymbolModulate(codedTrBlock, pdsch.Modulation);
+        
+        noiseBits = randn(size(txSoftBits)) + 1i * randn(size(txSoftBits));
+        noiseBits = noiseBits .* db2mag(-(snrdB+3));
+            
+        rxSoftBits = nrSymbolDemodulate(txSoftBits + noiseBits, pdsch.Modulation, db2pow(-snrdB));
+        [~, nacked] = decDL(rxSoftBits, pdsch.Modulation, pdsch.NLayers, rv);
+        
+        if nacked == true
             totalErr = totalErr + 1;
         end
+
     end
     theBler = totalErr / nSample;
-    %toc
 end
-
-function nacked = doTransmmit(pdsch, snrdB)
-%%
-trBlkLen = hPDSCHTBS(pdsch, 12*pdsch.nSymbol);
-trBlk = randi([0 1],trBlkLen,1,'int8');
-
-encDL = nrDLSCH('TargetCodeRate', pdsch.TargetCodeRate);
-setTransportBlock(encDL,trBlk);
-outlen = 12 * pdsch.nSymbol * pdsch.nPrb * pdsch.BitsPerSymbol;
-rv = 0;
-codedTrBlock = encDL(pdsch.Modulation, pdsch.NLayers, outlen, rv);
-
-%%
-txSoftBits = nrSymbolModulate(codedTrBlock, pdsch.Modulation);
-noiseBits = randn(size(txSoftBits)) + 1i * randn(size(txSoftBits));
-noiseBits = noiseBits .* db2mag(-(snrdB+3));
-rxSoftBits = nrSymbolDemodulate(txSoftBits + noiseBits, pdsch.Modulation,...
-                                db2pow(-snrdB));
-%%
-decDL = nrDLSCHDecoder('TargetCodeRate', pdsch.TargetCodeRate, ...
-                       'TransportBlockLength', trBlkLen);
-[~, nacked] = decDL(rxSoftBits, pdsch.Modulation, pdsch.NLayers, rv);
-end
-
