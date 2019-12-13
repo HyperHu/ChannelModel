@@ -4,7 +4,7 @@ SpectralEfficiency_Table_size = 43;
 
 %%
 %nPRB_list = [5 10 20 50 100 200];
-nPRB_list = [5 10 50 100];
+nPRB_list = [1 2 4];
 for nPrbIdx = 1:size(nPRB_list,2)
     load("ep_list_PRB"+nPRB_list(nPrbIdx), "ep_list", "nPrb");
     ddd = 0.05;
@@ -13,10 +13,10 @@ for nPrbIdx = 1:size(nPRB_list,2)
     seEnd = SpectralEfficiency_Table_size;
     blerMatrix = zeros(SpectralEfficiency_Table_size, size(snrdB_List,2));
     
-    if nPRB_list(nPrbIdx) == 5
-        seStart = 38;
-        load("Done37_blerMatrix_2KSample_PRB5.mat", "blerMatrix");
-    end
+%     if nPRB_list(nPrbIdx) == 5
+%         seStart = 38;
+%         load("Done37_blerMatrix_2KSample_PRB5.mat", "blerMatrix");
+%     end
     
     for seIdx = seStart:seEnd
         tic
