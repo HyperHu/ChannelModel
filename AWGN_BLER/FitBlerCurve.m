@@ -25,6 +25,9 @@ c_gauss = zeros(1, endSeIdx);
 for tmpIdx = startIdx:endSeIdx
     seIdx = tmpIdx;
     diffVal = [0 blerMatrix(seIdx,1:end-1)] - [0 blerMatrix(seIdx,2:end)];
+    diffVal = diffVal ./ sum(diffVal);
+    idxL = round(1 + (ep_list(seIdx,1) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
+    idxR = round(1 + (ep_list(seIdx,2) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
 
     %%
     gaussEqn = 'a*exp(-((x-b)/c)^2)';
@@ -41,8 +44,6 @@ for tmpIdx = startIdx:endSeIdx
     end
     
     %%
-    idxL = round(1 + (ep_list(seIdx,1) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
-    idxR = round(1 + (ep_list(seIdx,2) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
     err_gauss(tmpIdx) = std(blerMatrix(seIdx, idxL:idxR) - estBler_gauss(idxL:idxR));
     a_gauss(tmpIdx) = fff_gauss.a;
     b_gauss(tmpIdx) = fff_gauss.b;
