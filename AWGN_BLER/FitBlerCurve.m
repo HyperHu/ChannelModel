@@ -3,21 +3,26 @@ clear all;
 
 load("blerMatrix_2KSample_PRB20.mat");
 load("ep_list_PRB20.mat", "ep_list", "nPrb");
-
-% load("Done8_blerMatrix_2KSample_PRB1.mat");
-% load("ep_list_PRB1.mat", "ep_list", "nPrb");
-% snrdB_List = -15:0.05:30;
-
 load("SpectralEfficiency_Table.mat");
 %%
-maxSeIdx = 43;
-err_poly2 = zeros(1, maxSeIdx);
-err_gauss = zeros(1, maxSeIdx);
-a_gauss = zeros(1, maxSeIdx);
-b_gauss = zeros(1, maxSeIdx);
-c_gauss = zeros(1, maxSeIdx);
+% All
+startIdx = 1; endSeIdx = 43;
+% QPSK
+% startIdx = 1; endSeIdx = 16;
+% 16QAM
+%startIdx = 17; endSeIdx = 23;
+% 64QAM
+%startIdx = 24; endSeIdx = 35;
+% 256QAM
+%startIdx = 36; endSeIdx = 43;
 
-for tmpIdx = 1:maxSeIdx
+err_poly2 = zeros(1, endSeIdx);
+err_gauss = zeros(1, endSeIdx);
+a_gauss = zeros(1, endSeIdx);
+b_gauss = zeros(1, endSeIdx);
+c_gauss = zeros(1, endSeIdx);
+
+for tmpIdx = startIdx:endSeIdx
     seIdx = tmpIdx;
     diffVal = [0 blerMatrix(seIdx,1:end-1)] - [0 blerMatrix(seIdx,2:end)];
 
@@ -44,22 +49,35 @@ for tmpIdx = 1:maxSeIdx
     c_gauss(tmpIdx) = fff_gauss.c;
     
     %%
-    figure(3); hold on; grid on;
-    plot(snrdB_List, blerMatrix(seIdx, :), '.');
-    plot(snrdB_List, estBler_gauss, '--');
-    
-    figure(4); hold on; grid on;
-    plot(snrdB_List, diffVal, '*');
-    plot(snrdB_List, estDiff_gauss, '--');
+%     figure(4); hold on; grid on;
+%     plot(snrdB_List, blerMatrix(seIdx, :), '.');
+%     plot(snrdB_List, estBler_gauss, '--');
+%     
+%     figure(5); hold on; grid on;
+%     plot(snrdB_List, diffVal, '*');
+%     plot(snrdB_List, estDiff_gauss, '--');
 end
 
 
 %%
+% figure(1); hold on; grid on;
+% plot(SpectralEfficiency_Table(startIdx:endSeIdx), err_gauss(startIdx:endSeIdx), '--');
+% 
+% figure(2); hold on; grid on;
+% plot(SpectralEfficiency_Table(startIdx:endSeIdx), b_gauss(startIdx:endSeIdx));
+% 
+% figure(3); hold on; grid on;
+% plot(SpectralEfficiency_Table(startIdx:endSeIdx), c_gauss(startIdx:endSeIdx));
+% plot(SpectralEfficiency_Table(startIdx:endSeIdx), a_gauss(startIdx:endSeIdx));
+% plot(SpectralEfficiency_Table(startIdx:endSeIdx), a_gauss(startIdx:endSeIdx) .* c_gauss(startIdx:endSeIdx));
+
 figure(1); hold on; grid on;
-plot(SpectralEfficiency_Table(1:maxSeIdx), err_gauss, '--');
+plot((startIdx:endSeIdx), err_gauss(startIdx:endSeIdx), '--');
 
 figure(2); hold on; grid on;
-plot(SpectralEfficiency_Table(1:maxSeIdx), a_gauss * 10);
-plot(SpectralEfficiency_Table(1:maxSeIdx), b_gauss);
-plot(SpectralEfficiency_Table(1:maxSeIdx), c_gauss);
+plot((startIdx:endSeIdx), b_gauss(startIdx:endSeIdx));
 
+figure(3); hold on; grid on;
+plot((startIdx:endSeIdx), c_gauss(startIdx:endSeIdx));
+plot((startIdx:endSeIdx), a_gauss(startIdx:endSeIdx));
+plot((startIdx:endSeIdx), a_gauss(startIdx:endSeIdx) .* c_gauss(startIdx:endSeIdx));
