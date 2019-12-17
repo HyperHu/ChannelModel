@@ -4,7 +4,7 @@ SpectralEfficiency_Table_size = 43;
 
 %%
 %nPRB_list = [5 10 20 50 100 200];
-nPRB_list = [2 4 10 50];
+nPRB_list = [100 200];
 for nPrbIdx = 1:size(nPRB_list,2)
     load("ep_list_PRB"+nPRB_list(nPrbIdx), "ep_list", "nPrb");
     ddd = 0.05;

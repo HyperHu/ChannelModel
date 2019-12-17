@@ -1,14 +1,15 @@
 %%
-clear all;
+%clear all;
 
-load("blerMatrix_2KSample_PRB20.mat");
+load("blerMatrix_2KSample_PRB5.mat");
+%load("Done27_2KSample_PRB100.mat");
 load("ep_list_PRB20.mat", "ep_list", "nPrb");
 load("SpectralEfficiency_Table.mat");
 %%
 % All
-startIdx = 1; endSeIdx = 43;
+% startIdx = 1; endSeIdx = 27;
 % QPSK
-% startIdx = 1; endSeIdx = 16;
+startIdx = 1; endSeIdx = 16;
 % 16QAM
 %startIdx = 17; endSeIdx = 23;
 % 64QAM
@@ -33,6 +34,12 @@ for tmpIdx = startIdx:endSeIdx
     gaussEqn = 'a*exp(-((x-b)/c)^2)';
     startPoints = [0.1 (ep_list(seIdx,2) + ep_list(seIdx,1))/2 0.25];
     fff_gauss = fit(snrdB_List',diffVal',gaussEqn, 'Start', startPoints);
+    estDiff_gauss = fff_gauss(snrdB_List);
+    estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
+
+    gaussEqn = 'a*exp(-((x-b)/c)^2)';
+    startPoints = [abs(fff_gauss.a) fff_gauss.b abs(fff_gauss.c)];
+    fff_gauss = fit(snrdB_List',estDiff_gauss,gaussEqn, 'Start', startPoints);
     estDiff_gauss = fff_gauss(snrdB_List);
     estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
     
@@ -79,6 +86,6 @@ figure(2); hold on; grid on;
 plot((startIdx:endSeIdx), b_gauss(startIdx:endSeIdx));
 
 figure(3); hold on; grid on;
+%plot((startIdx:endSeIdx), a_gauss(startIdx:endSeIdx));
 plot((startIdx:endSeIdx), c_gauss(startIdx:endSeIdx));
-plot((startIdx:endSeIdx), a_gauss(startIdx:endSeIdx));
-plot((startIdx:endSeIdx), a_gauss(startIdx:endSeIdx) .* c_gauss(startIdx:endSeIdx));
+plot((startIdx:endSeIdx), a_gauss(startIdx:endSeIdx) .* c_gauss(startIdx:endSeIdx), '--');
