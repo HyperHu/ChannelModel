@@ -1,7 +1,7 @@
 function theTrxGain = getTrxGain(pMax_dBm, effTotal, theDirectivity_dB, polaType)
 
 tmpV = effTotal * db2pow(theDirectivity_dB) * db2pow(pMax_dBm - 30);
-
+tmpV = tmpV / (4*pi);
 % [theta_Hat phi_Hat] in 3GPP 38.901
 switch (polaType)
     case 'V'

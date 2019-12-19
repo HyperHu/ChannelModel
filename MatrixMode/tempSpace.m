@@ -1,14 +1,38 @@
 %%
 clear all;
+addpath(pwd + "\..");
+addpath(pwd + "\..\Utility");
 
-tao = 2;
-nSamples = 5;
-delayMat = circshift(eye(nSamples), -tao, 2);
+%%
+[f1, f2, f3, f4] = GenCoordSysTransformer([0 0 -45]);
 
-pathLoss_dB = 10;
-kappa_dB = 8;
-randomPhase = exp(2j*pi*rand(2));
-N1_Mat = db2mag(-pathLoss_dB) .* [1 db2mag(-kappa_dB); db2mag(-kappa_dB) 1] .* randomPhase;
+for idx = 1:100000
+    dirInLCS = [180*rand(1) 180*(2*rand(1) - 1)];
+    fcInLCS = rand(1, 2);
+    [dirInGCS, fcInGCS] = f4(dirInLCS, fcInLCS);
+    [ddd, fff] = f3(dirInGCS, fcInGCS);
+    if (norm(dirInLCS - ddd) > 1e-6)
+        dirInLCS
+        ddd
+        assert(0);
+    end
+    if (norm(fcInLCS - fff) > 1e-6)
+        fcInLCS
+        fff
+        assert(0);
+    end
+end
+
+%%
+% tao = 2;
+% nSamples = 5;
+% delayMat = circshift(eye(nSamples), -tao, 2);
+% 
+% pathLoss_dB = 10;
+% kappa_dB = 8;
+% randomPhase = exp(2j*pi*rand(2));
+% N1_Mat = db2mag(-pathLoss_dB) .* [1 db2mag(-kappa_dB); db2mag(-kappa_dB) 1] .* randomPhase;
+
 
 
 %%
