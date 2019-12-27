@@ -1,10 +1,9 @@
 %%
 %clear all;
-
-load("blerMatrix_2KSample_PRB5.mat");
-%load("Done27_2KSample_PRB100.mat");
+load("blerMatrixQPSK_2KSample_PRB50.mat");
 load("ep_list_PRB20.mat", "ep_list", "nPrb");
 load("SpectralEfficiency_Table.mat");
+
 %%
 % All
 % startIdx = 1; endSeIdx = 27;
