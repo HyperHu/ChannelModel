@@ -1,16 +1,19 @@
 %%
 %clear all;
-load("blerMatrixQPSK_2KSample_PRB50.mat");
-load("ep_list_PRB20.mat", "ep_list", "nPrb");
+%blerMatrixFile = "blerMatrix16QAM_5KSample_PRB50.mat";
+%blerMatrixFile = "blerMatrixQPSK_5KSample_PRB50.mat";
+blerMatrixFile = "blerMatrix_2KSample_PRB20.mat";
+load(blerMatrixFile);
+load("ep_list_PRB" + nPrb +".mat", "ep_list");
 load("SpectralEfficiency_Table.mat");
 
 %%
 % All
 % startIdx = 1; endSeIdx = 27;
 % QPSK
-startIdx = 1; endSeIdx = 16;
+%startIdx = 1; endSeIdx = 16;
 % 16QAM
-%startIdx = 17; endSeIdx = 23;
+startIdx = 17; endSeIdx = 23;
 % 64QAM
 %startIdx = 24; endSeIdx = 35;
 % 256QAM
@@ -56,13 +59,14 @@ for tmpIdx = startIdx:endSeIdx
     c_gauss(tmpIdx) = fff_gauss.c;
     
     %%
-%     figure(4); hold on; grid on;
-%     plot(snrdB_List, blerMatrix(seIdx, :), '.');
-%     plot(snrdB_List, estBler_gauss, '--');
+    figure(4); hold on; grid on;
+%     plot(blerMatrix(seIdx, idxL:idxR) - estBler_gauss(idxL:idxR));
+    plot(snrdB_List, blerMatrix(seIdx, :), '.');
+    plot(snrdB_List, estBler_gauss, '--');
 %     
-%     figure(5); hold on; grid on;
-%     plot(snrdB_List, diffVal, '*');
-%     plot(snrdB_List, estDiff_gauss, '--');
+    figure(5); hold on; grid on;
+    plot(snrdB_List, diffVal, '*');
+    plot(snrdB_List, estDiff_gauss, '--');
 end
 
 
