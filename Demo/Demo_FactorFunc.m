@@ -7,7 +7,7 @@ addpath(pwd + "\..\Utility");
 xList = -5.5:0.01:5.49;
 %nList = [2, 4, 8, 16, 32, 64];
 %nList = [256, 512, 1024, 2048, 4096];
-nList = [2048];
+nList = [4];
 
 figure(); hold on; grid on;
 for idx = 1:size(nList,2)
