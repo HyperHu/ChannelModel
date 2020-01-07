@@ -1,21 +1,24 @@
 %%
-%clear all;
-blerMatrixFile = "blerMatrix64QAM_5KSample_PRB50.mat";
+clear all;
 %blerMatrixFile = "blerMatrixQPSK_5KSample_PRB50.mat";
-%blerMatrixFile = "blerMatrix_2KSample_PRB20.mat";
+%blerMatrixFile = "blerMatrix16QAM_5KSample_PRB50.mat";
+%blerMatrixFile = "blerMatrix64QAM_5KSample_PRB50.mat";
+
+blerMatrixFile = "blerMatrix_2KSample_PRB1.mat";
+%blerMatrixFile = "blerMatrix16QAM_XKSample_PRB50.mat";
 load(blerMatrixFile);
 load("ep_list_PRB" + nPrb +".mat", "ep_list");
 load("SpectralEfficiency_Table.mat");
 
 %%
 % All
-% startIdx = 1; endSeIdx = 27;
+startIdx = 1; endSeIdx = 43;
 % QPSK
 %startIdx = 1; endSeIdx = 16;
 % 16QAM
 %startIdx = 17; endSeIdx = 23;
 % 64QAM
-startIdx = 24; endSeIdx = 35;
+%startIdx = 24; endSeIdx = 35;
 % 256QAM
 %startIdx = 36; endSeIdx = 43;
 
@@ -35,15 +38,15 @@ for tmpIdx = startIdx:endSeIdx
     %%
     gaussEqn = 'a*exp(-((x-b)/c)^2)';
     startPoints = [0.1 (ep_list(seIdx,2) + ep_list(seIdx,1))/2 0.25];
-    fff_gauss = fit(snrdB_List',diffVal',gaussEqn, 'Start', startPoints);
+    fff_gauss = fit(snrdB_List(idxL:idxR)',diffVal(idxL:idxR)',gaussEqn, 'Start', startPoints);
     estDiff_gauss = fff_gauss(snrdB_List);
     estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
 
-    gaussEqn = 'a*exp(-((x-b)/c)^2)';
-    startPoints = [abs(fff_gauss.a) fff_gauss.b abs(fff_gauss.c)];
-    fff_gauss = fit(snrdB_List',estDiff_gauss,gaussEqn, 'Start', startPoints);
-    estDiff_gauss = fff_gauss(snrdB_List);
-    estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
+%     gaussEqn = 'a*exp(-((x-b)/c)^2)';
+%     startPoints = [abs(fff_gauss.a) fff_gauss.b abs(fff_gauss.c)];
+%     fff_gauss = fit(snrdB_List(idxL:idxR)',estDiff_gauss(idxL:idxR),gaussEqn, 'Start', startPoints);
+%     estDiff_gauss = fff_gauss(snrdB_List);
+%     estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
     
     %%
     estBler_gauss = zeros(1, size(blerMatrix,2));
@@ -63,7 +66,7 @@ for tmpIdx = startIdx:endSeIdx
 %     %plot(blerMatrix(seIdx, idxL:idxR) - estBler_gauss(idxL:idxR));
 %     plot(snrdB_List, blerMatrix(seIdx, :), '.');
 %     plot(snrdB_List, estBler_gauss, '--');
-
+% 
 %     figure(5); hold on; grid on;
 %     plot(snrdB_List, diffVal, '*');
 %     plot(snrdB_List, estDiff_gauss, '--');

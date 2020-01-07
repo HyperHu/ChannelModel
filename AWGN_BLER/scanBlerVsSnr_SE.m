@@ -2,118 +2,97 @@
 clear all;
 SpectralEfficiency_Table_size = 43;
 
-%%
-nPRB_list = [50 100 200 2 4 10 1 5 20];
+nPRB_list = [2, 4, 5, 10, 20, 50, 100, 200];
 for nPrbIdx = 1:size(nPRB_list,2)
-    load("ep_list_PRB"+nPRB_list(nPrbIdx), "ep_list", "nPrb");
+    load("SINRMidPoint.mat");
+    assert(size(SINRMidPoint, 2) == SpectralEfficiency_Table_size);
+    nPrb = nPRB_list(nPrbIdx);
     
-    % QPSK
-    seStart = 1; seEnd = 16;
-    ddd = 0.05;
-    snrdB_List = -15:ddd:30;
-    blerMatrix = zeros(SpectralEfficiency_Table_size, size(snrdB_List,2));
-    for seIdx = seStart:seEnd
-        tic
-        disp(seIdx);
-        for snrIdx = 1:size(blerMatrix,2)
-            if (snrdB_List(snrIdx) < ep_list(seIdx,1))
-                blerMatrix(seIdx, snrIdx) = 1;
-                continue;
-            end
-            if (snrdB_List(snrIdx) > ep_list(seIdx,2))
-                break;
-            end
-            blerMatrix(seIdx, snrIdx) = ...
-                        calBler(seIdx, snrdB_List(snrIdx), nPrb, 5*1000);
-        end
-        toc
-    end
-    save("blerMatrixQPSK_5KSample_PRB"+nPRB_list(nPrbIdx),...
-         "blerMatrix", "snrdB_List", "nPrb");
-     
-    % 16QAM
-    seStart = 17; seEnd = 23;
-    ddd = 0.025;
-    snrdB_List = -15:ddd:30;
-    blerMatrix = zeros(SpectralEfficiency_Table_size, size(snrdB_List,2));
-    for seIdx = seStart:seEnd
-        tic
-        disp(seIdx);
-        for snrIdx = 1:size(blerMatrix,2)
-            if (snrdB_List(snrIdx) < ep_list(seIdx,1))
-                blerMatrix(seIdx, snrIdx) = 1;
-                continue;
-            end
-            if (snrdB_List(snrIdx) > ep_list(seIdx,2))
-                break;
-            end
-            blerMatrix(seIdx, snrIdx) = ...
-                        calBler(seIdx, snrdB_List(snrIdx), nPrb, 5*1000);
-        end
-        toc
-    end
-    save("blerMatrix16QAM_5KSample_PRB"+nPRB_list(nPrbIdx),...
-         "blerMatrix", "snrdB_List", "nPrb");
+    theMod = "QPSK"; seStart = 1; seEnd = 16; ddd = 0.05;
+    %theMod = "16QAM"; seStart = 17; seEnd = 23; ddd = 0.02;
+    %theMod = "64QAM"; seStart = 24; seEnd = 35; ddd = 0.02;
+    %theMod = "256QAM"; seStart = 36; seEnd = 43; ddd = 0.01;
     
-    % 64QAM
-    seStart = 24; seEnd = 35;
-    ddd = 0.02;
     snrdB_List = -15:ddd:30;
     blerMatrix = zeros(SpectralEfficiency_Table_size, size(snrdB_List,2));
     for seIdx = seStart:seEnd
         tic
-        disp(seIdx);
-        for snrIdx = 1:size(blerMatrix,2)
-            if (snrdB_List(snrIdx) < ep_list(seIdx,1))
-                blerMatrix(seIdx, snrIdx) = 1;
-                continue;
-            end
-            if (snrdB_List(snrIdx) > ep_list(seIdx,2))
-                break;
-            end
-            blerMatrix(seIdx, snrIdx) = ...
-                        calBler(seIdx, snrdB_List(snrIdx), nPrb, 5*1000);
-        end
+        midIdx = find(snrdB_List > SINRMidPoint(seIdx), 1);
+        [blerCurve, ~] = CalBlerCurve(seIdx, nPrb, snrdB_List, midIdx);
+        blerMatrix(seIdx, :) = blerCurve;
         toc
     end
-    save("blerMatrix64QAM_5KSample_PRB"+nPRB_list(nPrbIdx),...
-         "blerMatrix", "snrdB_List", "nPrb");
-     
-    % 256QAM
-    seStart = 36; seEnd = 43;
-    ddd = 0.01;
-    snrdB_List = -15:ddd:30;
-    blerMatrix = zeros(SpectralEfficiency_Table_size, size(snrdB_List,2));
-    for seIdx = seStart:seEnd
-        tic
-        disp(seIdx);
-        for snrIdx = 1:size(blerMatrix,2)
-            if (snrdB_List(snrIdx) < ep_list(seIdx,1))
-                blerMatrix(seIdx, snrIdx) = 1;
-                continue;
-            end
-            if (snrdB_List(snrIdx) > ep_list(seIdx,2))
-                break;
-            end
-            blerMatrix(seIdx, snrIdx) = ...
-                        calBler(seIdx, snrdB_List(snrIdx), nPrb, 5*1000);
-        end
-        toc
-    end
-    save("blerMatrix256QAM_5KSample_PRB"+nPRB_list(nPrbIdx),...
-         "blerMatrix", "snrdB_List", "nPrb");
-
+    save("blerMat"+theMod+"_PRB"+nPRB_list(nPrbIdx), "blerMatrix", "snrdB_List", "nPrb");
 end
 
-%%
-% figure(1); hold on; grid on;
-% mesh(snrdB_List, sqrt(SpectralEfficiency_Table), blerMatrix);
+function [blerCurve, sigCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, midIdx)
+nSample = 1000;
+nIterMax = 25;
+thT = 0.01;
 
-%%
-% figure(2);
-% for idx = 1:size(blerMatrix,1)
-%     plot(snrdB_List, blerMatrix(idx,:), '*--'); hold on; grid on;
-% end
+blerCurve = zeros(size(snrdB_List));
+sigCurve = ones(size(snrdB_List));
+tmpIdx = midIdx;
+while true
+    nIter = 0;
+    aveBler = 0;
+    while true
+        aveBler = (aveBler * nIter + calBler(seIdx, snrdB_List(tmpIdx), nPrb, nSample)) / (nIter + 1);
+        nIter = nIter + 1;
+        tmpT = min(aveBler, 1-aveBler); assert(tmpT >= 0);
+        tmpSigma = sqrt(aveBler * (1 - aveBler) / (nSample*nIter - 1));
+        if (nIter >= nIterMax) || ((tmpT > 0) && (2*tmpSigma/tmpT < 0.1))
+            break;
+        end
+    end
+    fprintf('seIdx %d SINR %.4f BLER %.4f [ %.4f %.4f ] [%.4f %d]\n',...
+        seIdx, snrdB_List(tmpIdx), aveBler,...
+        aveBler-2*tmpSigma, aveBler+2*tmpSigma,...
+        tmpSigma, nIter);
+    blerCurve(tmpIdx) = aveBler;
+    sigCurve(tmpIdx) = tmpSigma;
+    tmpIdx = tmpIdx + 1;
+    if tmpT < thT
+        break;
+    end
+end
+
+tmpIdx = midIdx - 1;
+while true
+    nIter = 0;
+    aveBler = 0;
+    while true
+        aveBler = (aveBler * nIter + calBler(seIdx, snrdB_List(tmpIdx), nPrb, nSample)) / (nIter + 1);
+        nIter = nIter + 1;
+        tmpT = min(aveBler, 1-aveBler); assert(tmpT >= 0);
+        tmpSigma = sqrt(aveBler * (1 - aveBler) / (nSample*nIter - 1));
+        if (nIter >= nIterMax) || ((tmpT > 0) && (2*tmpSigma/tmpT < 0.1))
+            break;
+        end
+    end
+    fprintf('seIdx %d SINR %.4f BLER %.4f [ %.4f %.4f ] [%.4f %d]\n',...
+        seIdx, snrdB_List(tmpIdx), aveBler,...
+        aveBler-2*tmpSigma, aveBler+2*tmpSigma,...
+        tmpSigma, nIter);
+    blerCurve(tmpIdx) = aveBler;
+    sigCurve(tmpIdx) = tmpSigma;
+    tmpIdx = tmpIdx - 1;
+    if tmpT < thT
+        break;
+    end
+end
+blerCurve(1:tmpIdx) = 1;
+end
+
+% %%
+% % figure(1); hold on; grid on;
+% % mesh(snrdB_List, sqrt(SpectralEfficiency_Table), blerMatrix);
+% 
+% %%
+% % figure(2);
+% % for idx = 1:size(blerMatrix,1)
+% %     plot(snrdB_List, blerMatrix(idx,:), '*--'); hold on; grid on;
+% % end
 
 
 
