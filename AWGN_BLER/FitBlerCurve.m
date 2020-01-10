@@ -3,18 +3,18 @@ clear all;
 %blerMatrixFile = "blerMatrixQPSK_5KSample_PRB50.mat";
 %blerMatrixFile = "blerMatrix16QAM_5KSample_PRB50.mat";
 %blerMatrixFile = "blerMatrix64QAM_5KSample_PRB50.mat";
-
-blerMatrixFile = "blerMatrix_2KSample_PRB1.mat";
 %blerMatrixFile = "blerMatrix16QAM_XKSample_PRB50.mat";
+blerMatrixFile = "blerMatQPSK_PRB2.mat";
+
 load(blerMatrixFile);
 load("ep_list_PRB" + nPrb +".mat", "ep_list");
 load("SpectralEfficiency_Table.mat");
 
 %%
 % All
-startIdx = 1; endSeIdx = 43;
+%startIdx = 1; endSeIdx = 43;
 % QPSK
-%startIdx = 1; endSeIdx = 16;
+startIdx = 1; endSeIdx = 16;
 % 16QAM
 %startIdx = 17; endSeIdx = 23;
 % 64QAM
@@ -32,8 +32,10 @@ for tmpIdx = startIdx:endSeIdx
     seIdx = tmpIdx;
     diffVal = [0 blerMatrix(seIdx,1:end-1)] - [0 blerMatrix(seIdx,2:end)];
     diffVal = diffVal ./ sum(diffVal);
-    idxL = round(1 + (ep_list(seIdx,1) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
-    idxR = round(1 + (ep_list(seIdx,2) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
+    %idxL = round(1 + (ep_list(seIdx,1) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
+    %idxR = round(1 + (ep_list(seIdx,2) - snrdB_List(1)) / (snrdB_List(2) - snrdB_List(1)));
+    idxL = max(1, find(diffVal > 0, 1, 'first') - 5);
+    idxR = min(size(blerMatrix, 2), find(diffVal > 0, 1, 'last') + 5);
 
     %%
     gaussEqn = 'a*exp(-((x-b)/c)^2)';
@@ -62,14 +64,14 @@ for tmpIdx = startIdx:endSeIdx
     c_gauss(tmpIdx) = fff_gauss.c;
     
     %%
-%     figure(4); hold on; grid on;
-%     %plot(blerMatrix(seIdx, idxL:idxR) - estBler_gauss(idxL:idxR));
-%     plot(snrdB_List, blerMatrix(seIdx, :), '.');
-%     plot(snrdB_List, estBler_gauss, '--');
+    figure(4); hold on; grid on;
+    %plot(estBler_gauss(idxL:idxR) - (blerMatrix(seIdx, idxL:idxR)));
+    plot(snrdB_List(idxL:idxR), blerMatrix(seIdx, idxL:idxR), '.');
+    plot(snrdB_List(idxL:idxR), estBler_gauss(idxL:idxR), '--');
 % 
-%     figure(5); hold on; grid on;
-%     plot(snrdB_List, diffVal, '*');
-%     plot(snrdB_List, estDiff_gauss, '--');
+    figure(5); hold on; grid on;
+    plot(snrdB_List(idxL:idxR), diffVal(idxL:idxR), '*');
+    plot(snrdB_List(idxL:idxR), estDiff_gauss(idxL:idxR), '--');
 end
 
 

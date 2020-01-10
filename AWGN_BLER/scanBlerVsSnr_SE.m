@@ -4,11 +4,12 @@ SpectralEfficiency_Table_size = 43;
 
 nPRB_list = [2, 4, 5, 10, 20, 50, 100, 200];
 for nPrbIdx = 1:size(nPRB_list,2)
-    load("SINRMidPoint.mat");
-    assert(size(SINRMidPoint, 2) == SpectralEfficiency_Table_size);
+    %load("SINRMidPoint.mat");
+    %assert(size(SINRMidPoint, 2) == SpectralEfficiency_Table_size);
+    SINRMidPoint = 1.015 * (1:SpectralEfficiency_Table_size) - 12.5;
     nPrb = nPRB_list(nPrbIdx);
     
-    theMod = "QPSK"; seStart = 1; seEnd = 16; ddd = 0.05;
+    theMod = "QPSK"; seStart = 1; seEnd = 16; ddd = 0.025;
     %theMod = "16QAM"; seStart = 17; seEnd = 23; ddd = 0.02;
     %theMod = "64QAM"; seStart = 24; seEnd = 35; ddd = 0.02;
     %theMod = "256QAM"; seStart = 36; seEnd = 43; ddd = 0.01;
