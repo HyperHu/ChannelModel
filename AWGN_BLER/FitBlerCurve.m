@@ -63,12 +63,12 @@ for tmpIdx = startIdx:endSeIdx
     b_gauss(tmpIdx) = fff_gauss.b;
     c_gauss(tmpIdx) = fff_gauss.c;
     
-    %%
+%     %%
     figure(4); hold on; grid on;
     %plot(estBler_gauss(idxL:idxR) - (blerMatrix(seIdx, idxL:idxR)));
     plot(snrdB_List(idxL:idxR), blerMatrix(seIdx, idxL:idxR), '.');
     plot(snrdB_List(idxL:idxR), estBler_gauss(idxL:idxR), '--');
-% 
+% % 
     figure(5); hold on; grid on;
     plot(snrdB_List(idxL:idxR), diffVal(idxL:idxR), '*');
     plot(snrdB_List(idxL:idxR), estDiff_gauss(idxL:idxR), '--');

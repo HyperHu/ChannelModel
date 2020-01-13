@@ -26,6 +26,12 @@ for nPrbIdx = 1:size(nPRB_list,2)
     save("blerMat"+theMod+"_PRB"+nPRB_list(nPrbIdx), "blerMatrix", "snrdB_List", "nPrb");
 end
 
+% theMod = "QPSK";ddd = 0.025; seIdx = 1; nPrb = 2; snrdB_List = -15:ddd:30;
+% SINRMidPoint = 1.015 * (1:SpectralEfficiency_Table_size) - 12.5 + 1.25;
+% midIdx = find(snrdB_List > SINRMidPoint(seIdx), 1);
+% [blerCurve, ~] = CalBlerCurve(seIdx, nPrb, snrdB_List, midIdx);
+% save("blerCur"+theMod+"_PRB"+nPrb+"_SeId"+seIdx, "blerCurve");
+
 function [blerCurve, sigCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, midIdx)
 nSample = 1000;
 nIterMax = 25;
