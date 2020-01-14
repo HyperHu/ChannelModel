@@ -7,7 +7,6 @@ clear all;
 blerMatrixFile = "blerMatQPSK_PRB2.mat";
 
 load(blerMatrixFile);
-load("ep_list_PRB" + nPrb +".mat", "ep_list");
 load("SpectralEfficiency_Table.mat");
 
 %%
@@ -39,7 +38,7 @@ for tmpIdx = startIdx:endSeIdx
 
     %%
     gaussEqn = 'a*exp(-((x-b)/c)^2)';
-    startPoints = [0.1 (ep_list(seIdx,2) + ep_list(seIdx,1))/2 0.25];
+    startPoints = [0.1 (snrdB_List(idxL) + snrdB_List(idxR))/2 0.25];
     fff_gauss = fit(snrdB_List(idxL:idxR)',diffVal(idxL:idxR)',gaussEqn, 'Start', startPoints);
     estDiff_gauss = fff_gauss(snrdB_List);
     estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
