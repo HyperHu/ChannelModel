@@ -1,4 +1,4 @@
-function theBler = calBler(mcsIdx, snrdB, nPrb, nSample)
+function [theTbBler, theCbBler] = calBler(mcsIdx, snrdB, nPrb, nSample)
 ModulationOrder_Table = {'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' ...
                          '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' ...
                          '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' ...
@@ -26,14 +26,18 @@ BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
     pdsch.nSymbol = nSymbol;
 
     trBlkLen = hPDSCHTBS(pdsch, 12*pdsch.nSymbol);
-    outlen = 12 * pdsch.nSymbol * pdsch.nPrb * pdsch.BitsPerSymbol;
+    outlen = 12 * pdsch.nSymbol * pdsch.nPrb * pdsch.BitsPerSymbol * pdsch.NLayers;
     rv = 0;
     encDL = nrDLSCH('TargetCodeRate', pdsch.TargetCodeRate);
-    decDL = nrDLSCHDecoder('TargetCodeRate', pdsch.TargetCodeRate, ...
-                           'TransportBlockLength', trBlkLen);
+    decDL = myNrDLSCHDec('TargetCodeRate', pdsch.TargetCodeRate, ...
+                         'TransportBlockLength', trBlkLen);
+    %decDL = nrDLSCHDecoder('TargetCodeRate', pdsch.TargetCodeRate, ...
+    %                       'TransportBlockLength', trBlkLen);
     
 %%
     totalErr = 0;
+    totalCb = 0;
+    totalErrCb = 0;
     for iii = 1:nSample
         encDL.reset();
         decDL.reset();
@@ -45,12 +49,14 @@ BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
         noiseBits = noiseBits .* db2mag(-(snrdB+3));
             
         rxSoftBits = nrSymbolDemodulate(txSoftBits + noiseBits, pdsch.Modulation, db2pow(-snrdB));
-        [~, nacked] = decDL(rxSoftBits, pdsch.Modulation, pdsch.NLayers, rv);
+        [~, nacked, cbNacked] = decDL(rxSoftBits, pdsch.Modulation, pdsch.NLayers, rv);
         
         if nacked == true
             totalErr = totalErr + 1;
         end
-
+        totalCb = totalCb + size(cbNacked,2);
+        totalErrCb = totalErrCb + sum(cbNacked);
     end
-    theBler = totalErr / nSample;
+    theTbBler = totalErr / nSample;
+    theCbBler = totalErrCb / totalCb;
 end
