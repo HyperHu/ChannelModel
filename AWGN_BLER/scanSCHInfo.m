@@ -1,20 +1,9 @@
 %%
 clear all;
+load("TablesIn3GPP.mat");
 
 nSymbol = 12;
-ModulationOrder_Table = {'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' ...
-                         '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' ...
-                         '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' ...
-                         '256QAM' '256QAM' '256QAM' '256QAM' '256QAM' '256QAM' '256QAM' '256QAM'};
-TargetCodeRate_Table = [30 40 50 64 78 99 120 157 193 251 308 379 449 526 602 679 ...
-                        340 378 434 490 553 616 658 ...
-                        438 466 517 567 616 666 719 772 822 873 910 948 ...
-                        682.5 711 754 797 841 885 916.5 948];
-BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
-                       4, 4, 4, 4, 4, 4, 4, ...
-                       6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, ...
-                       8, 8, 8, 8, 8, 8, 8, 8];
-nPRB_list = [1, 2, 4, 5, 8, 10, 16, 20, 32, 50, 64, 100, 128, 200, 256];
+nPRB_list = 1:256;
 
 SpectralEfficiency_Table_size = size(TargetCodeRate_Table, 2);
 PRB_List_size = size(nPRB_list, 2);
@@ -42,6 +31,12 @@ for idxI = 1:SpectralEfficiency_Table_size
         realCodeRate(idxI, idxJ) =...
             (tbSizeMat(idxI, idxJ) + tmpInfo.L + (tmpInfo.C * tmpInfo.Lcb))...
             / (12 * pdsch.nSymbol * pdsch.nPrb * pdsch.BitsPerSymbol * pdsch.NLayers);
-        diffCodeRate(idxI, idxJ) = pdsch.TargetCodeRate - realCodeRate(idxI, idxJ);
+        diffCodeRate(idxI, idxJ) = (realCodeRate(idxI, idxJ) - pdsch.TargetCodeRate) / pdsch.TargetCodeRate;
     end
 end
+
+figure(); mesh(nPRB_list, SpectralEfficiency_Table, tbSizeMat);
+figure(); mesh(nPRB_list, SpectralEfficiency_Table, bgnMat);
+figure(); mesh(nPRB_list, SpectralEfficiency_Table, numCbMat);
+figure(); mesh(nPRB_list, SpectralEfficiency_Table, realCodeRate);
+figure(); mesh(nPRB_list, SpectralEfficiency_Table, diffCodeRate);

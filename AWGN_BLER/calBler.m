@@ -1,40 +1,22 @@
-function [theTbBler, theCbBler] = calBler(mcsIdx, snrdB, nPrb, nSample)
-ModulationOrder_Table = {'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' 'QPSK' ...
-                         '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' '16QAM' ...
-                         '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' '64QAM' ...
-                         '256QAM' '256QAM' '256QAM' '256QAM' '256QAM' '256QAM' '256QAM' '256QAM'};
+function [theTbBler, theCbBler] = calBler(mcsIdx, snrdB, nPrb, nSymbol, nSample)
+    load("TablesIn3GPP.mat", "TargetCodeRate_Table", "ModulationOrder_Table", "BitsPerSymbol_Table");
 
-TargetCodeRate_Table = [30 40 50 64 78 99 120 157 193 251 308 379 449 526 602 679 ...
-                        340 378 434 490 553 616 658 ...
-                        438 466 517 567 616 666 719 772 822 873 910 948 ...
-                        682.5 711 754 797 841 885 916.5 948];
-
-BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
-                       4, 4, 4, 4, 4, 4, 4, ...
-                       6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, ...
-                       8, 8, 8, 8, 8, 8, 8, 8];
-
-%%
-    nSymbol = 12;
     pdsch = struct();
+    pdsch.nPrb = nPrb;
+    pdsch.nSymbol = nSymbol;
     pdsch.NLayers = 1;
     pdsch.TargetCodeRate = TargetCodeRate_Table(mcsIdx) / 1024;
     pdsch.PRBSet = 0:nPrb - 1;
     pdsch.Modulation = ModulationOrder_Table{mcsIdx};
     pdsch.BitsPerSymbol = BitsPerSymbol_Table(mcsIdx);
-    pdsch.nPrb = nPrb;
-    pdsch.nSymbol = nSymbol;
 
     trBlkLen = hPDSCHTBS(pdsch, 12*pdsch.nSymbol);
     outlen = 12 * pdsch.nSymbol * pdsch.nPrb * pdsch.BitsPerSymbol * pdsch.NLayers;
     rv = 0;
     encDL = nrDLSCH('TargetCodeRate', pdsch.TargetCodeRate);
-    decDL = myNrDLSCHDec('TargetCodeRate', pdsch.TargetCodeRate, ...
-                         'TransportBlockLength', trBlkLen);
-    %decDL = nrDLSCHDecoder('TargetCodeRate', pdsch.TargetCodeRate, ...
-    %                       'TransportBlockLength', trBlkLen);
-    
-%%
+    decDL = myNrDLSCHDec('TargetCodeRate', pdsch.TargetCodeRate, 'TransportBlockLength', trBlkLen);
+    %decDL = nrDLSCHDecoder('TargetCodeRate', pdsch.TargetCodeRate, 'TransportBlockLength', trBlkLen);
+
     totalErr = 0;
     totalCb = 0;
     totalErrCb = 0;
@@ -55,7 +37,11 @@ BitsPerSymbol_Table = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
             totalErr = totalErr + 1;
         end
         totalCb = totalCb + size(cbNacked,2);
-        totalErrCb = totalErrCb + sum(cbNacked);
+        if (size(cbNacked,1) == 0)
+            totalErrCb = totalErr;
+        else
+            totalErrCb = totalErrCb + sum(cbNacked);
+        end
     end
     theTbBler = totalErr / nSample;
     theCbBler = totalErrCb / totalCb;

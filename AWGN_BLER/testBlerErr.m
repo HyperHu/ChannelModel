@@ -13,12 +13,30 @@
 % plot(blerEst, 3*estErr ./ blerEst);
 
 %%
+% clear all;
+% 
+% theBler = 0.001;
+% nSample = 500;
+% nTest = 100000;
+% tmpV = rand(nSample, nTest);
+% estBler = sum(tmpV < theBler, 1) ./ nSample;
+% mean(estBler)
+% histogram(estBler);
+
+%%
 clear all;
 
-theBler = 0.001;
-nSample = 500;
-nTest = 100000;
-tmpV = rand(nSample, nTest);
-estBler = sum(tmpV < theBler, 1) ./ nSample;
-mean(estBler)
-histogram(estBler);
+snrdB_List = -15:0.01:30;
+
+M = 4;
+baseOffset = -pow2db(sum(pow2(2:2:M)));
+itemOffset = 3 * 2 * (1:(M/2))';
+itemSinr = snrdB_List + baseOffset + itemOffset;
+itemNoisePower = db2pow(-(itemSinr));
+totalNoisePow = mean(itemNoisePower, 1);
+effSnrdB_List = -pow2db(totalNoisePow);
+figure(1); hold on; grid on;
+plot(snrdB_List, effSnrdB_List);
+
+
+
