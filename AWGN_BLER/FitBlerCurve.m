@@ -3,28 +3,18 @@ clear all;
 load("TablesIn3GPP.mat");
 
 %% Fit One Curve
-load("blerCur111256QAM_PRB10_SeId37.mat");
-%load("blerCurQPSK_PRB100_SeId16.mat");
-
-% theCurve1 = FitOneBlerCurve(cbBlerCurve, snrdB_List);
-% 
+load("blerMat256QAM_PRB1.mat");
+theTbCurve = FitOneBlerCurve(tbBlerMatrix(36,:), snrdB_List);
 % figure(1); hold on; grid on;
-% plot(snrdB_List, cbBlerCurve, '.');
-% plot(snrdB_List, theCurve1, 'r--');
-
-theCurve2 = FitOneBlerCurve(blerCurve, snrdB_List);
-figure(2); hold on; grid on;
-plot(snrdB_List, blerCurve, '.');
-plot(snrdB_List, theCurve2, '--');
-%plot(snrdB_List, 1 - ((1 - theCurve1) .^ 3), 'b--');
+% plot(snrdB_List, log10(tbBlerMatrix(37,:)), '.');
+% plot(snrdB_List, log10(theTbCurve), '--');
 
 
 function [estBlerCurve, A, B, C] = FitOneBlerCurve(theBlerCurve, snrdB_List)
-    %diffVal = ([1 theBlerCurve(1:end-1)] - [theBlerCurve(2:end) 0]) / 2;
-    diffVal = [0 theBlerCurve(1:end-1)] - [0 theBlerCurve(2:end)];
+    diffVal = [1 theBlerCurve(1:end-1)] - theBlerCurve;
     diffVal = diffVal ./ sum(diffVal);
-    idxL = max(1, find(diffVal > 0, 1, 'first') - 4);
-    idxR = min(size(theBlerCurve, 2), find(diffVal > 0, 1, 'last') + 4);
+    idxL = max(1, find(diffVal > 0, 1, 'first') - 2);
+    idxR = min(size(theBlerCurve, 2), find(diffVal > 0, 1, 'last') + 2);
     
     gaussEqn = 'a*exp(-((x-b)/c)^2)';
     startPoints = [0.1 (snrdB_List(idxL) + snrdB_List(idxR))/2 0.25];
@@ -42,12 +32,16 @@ function [estBlerCurve, A, B, C] = FitOneBlerCurve(theBlerCurve, snrdB_List)
     B = fff_gauss.b;
     C = fff_gauss.c;
     
-    figure(5); hold on; grid on;
-    plot(snrdB_List(idxL:idxR), diffVal(idxL:idxR), '*');
-    plot(snrdB_List(idxL:idxR), estDiff_gauss(idxL:idxR), '--');
+    figure(2); hold on; grid on;
+    plot(snrdB_List(idxL+2:idxR-5), log10(theBlerCurve(idxL+2:idxR-5)), '.');
+    plot(snrdB_List(idxL+2:idxR-5), log10(estBlerCurve(idxL+2:idxR-5)), '--');
     
-    figure(6); hold on; grid on;
-    plot(snrdB_List(idxL:idxR), estBlerCurve(idxL:idxR) - theBlerCurve(idxL:idxR));
+%     figure(5); hold on; grid on;
+%     plot(snrdB_List(idxL:idxR), diffVal(idxL:idxR), '*');
+%     plot(snrdB_List(idxL:idxR), estDiff_gauss(idxL:idxR), '--');
+%     
+%     figure(6); hold on; grid on;
+%     plot(snrdB_List(idxL:idxR), estBlerCurve(idxL:idxR) - theBlerCurve(idxL:idxR));
 end
 
 
