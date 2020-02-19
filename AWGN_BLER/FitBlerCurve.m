@@ -27,11 +27,14 @@ allB = [];
 allC = [];
 %%
 %%%% QPSK:1-16, 16QAM:17-23, 64QAM:24-35, 256QAM:36-43 %%%%
-theFileName = "NewData\blerMatQPSK_PRB10.mat"; startSeIdx = 1; endSeIdx = 16;
+% theFileName = "NewData\blerMatQPSK_PRB10.mat"; startSeIdx = 1; endSeIdx = 16;
+theFileName = "NewData\blerMat16QAM_PRB10.mat"; startSeIdx = 17; endSeIdx = 20;
+% theFileName = "NewData\blerMat64QAM_PRB10.mat"; startSeIdx = 24; endSeIdx = 35;
+
 % theFileName = "blerMatQPSK_PRB10.mat"; startSeIdx = 1; endSeIdx = 16;
-%theFileName = "blerMat16QAM_PRB10.mat"; startSeIdx = 17; endSeIdx = 23;
-%theFileName = "blerMat64QAM_PRB10.mat"; startSeIdx = 24; endSeIdx = 35;
-%theFileName = "blerMat256QAM_PRB10.mat"; startSeIdx = 36; endSeIdx = 43;
+% theFileName = "blerMat16QAM_PRB10.mat"; startSeIdx = 17; endSeIdx = 23;
+% theFileName = "blerMat64QAM_PRB10.mat"; startSeIdx = 24; endSeIdx = 35;
+% theFileName = "blerMat256QAM_PRB10.mat"; startSeIdx = 36; endSeIdx = 43;
 load(theFileName, 'snrdB_List', 'nPrb', 'cbBlerMatrix', 'tbBlerMatrix');
 
 tmpX = zeros(1, endSeIdx-startSeIdx+1);
@@ -39,7 +42,7 @@ tmpB = zeros(1, endSeIdx-startSeIdx+1);
 tmpC = zeros(1, endSeIdx-startSeIdx+1);
 for seIdx = startSeIdx:endSeIdx
     [theTbSize, bgn, nCb, effCodeRate] = CalSchInfo(seIdx, nPrb, 12);
-    [theCbCurve, snrPoint, A, B, C] = FitOneBlerCurve(cbBlerMatrix(seIdx, :), snrdB_List, 1);
+    [theCbCurve, snrPoint, A, B, C, theErr] = FitOneBlerCurve(cbBlerMatrix(seIdx, :), snrdB_List, 1);
     theTbCurve = 1 - (1 - theCbCurve) .^ nCb;
     
     tmpX(seIdx-startSeIdx+1) = effCodeRate;
@@ -64,61 +67,70 @@ for seIdx = startSeIdx:endSeIdx
         plot(snrdB_List, cbBlerMatrix(seIdx, :), '.'); plot(snrPoint, theCbCurve, '--');
     end
     plot(snrdB_List, tbBlerMatrix(seIdx, :), '.'); plot(snrPoint, theTbCurve);
+    figure(31); hold on; grid on;
+    plot(seIdx, theErr, 'x');
 end
 allX = [allX tmpX]; allB = [allB tmpB]; allC = [allC tmpC];
 
 
 %%
-function [estBlerCurve, snrPoint, A, B, C] = FitOneBlerCurve(theBlerCurve, snrdB_List, showFigure)
-    theL = 1; margin = -2;
-    nPoint = floor(size(theBlerCurve,2) / theL) * theL;
-    filterCurve = sum(reshape(theBlerCurve(1:nPoint), theL, []), 1);
-    filterSnr = mean(reshape(snrdB_List(1:nPoint), theL, []), 1);
-    diffVal = [theL filterCurve(1:end-1)] - filterCurve;
-    diffVal = diffVal ./ sum(diffVal);
-    idxL = max(1, find(diffVal > 0, 1, 'first') - margin);
-    idxR = min(size(filterCurve, 2), find(diffVal > 0, 1, 'last') + margin);
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    gaussEqn = 'a*exp(-((x-b)/c)^2)'; startPoints = [0.1 (filterSnr(idxL) + filterSnr(idxR))/2 0.25];
-    fff_gauss = fit(filterSnr(idxL:idxR)',diffVal(idxL:idxR)',gaussEqn, 'Start', startPoints);
+function [estBlerCurve, snrPoint, A, B, C, stdErr] = FitOneBlerCurve(theBlerCurve, snrdB_List, showFigure)
+    idxS = find(theBlerCurve < 1, 1, 'first'); idxE = find(theBlerCurve > 0, 1, 'last');
+    tmpY = theBlerCurve(idxS:idxE-1) - theBlerCurve(idxS+1:idxE); tmpX = snrdB_List(idxS+1:idxE);
+  
+    %%%%%%%%%%%%%%%%%%%%%%%%%% Fit based on Gauss %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    gaussEqn = 'a*exp(-((x-b)/c)^2)'; startPoints = [0.05 mean(tmpX) 0.25];
+    fff_gauss = fit(tmpX', tmpY', gaussEqn, 'Start', startPoints);
     
-    snrPoint = -15:0.001:30;
-    estDiff_gauss = fff_gauss(snrPoint); estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
-    tmpL = find(estDiff_gauss > 0.0001, 1, 'first'); tmpR = find(estDiff_gauss > 0.0001, 1, 'last');
+    snrPoint = -15:0.001:30; estY = fff_gauss(snrPoint); estY = estY ./ sum(estY);
+    tmpL = find(estY > 0.000001, 1, 'first'); tmpR = find(estY > 0.000001, 1, 'last');
     gaussEqn = 'a*exp(-((x-b)/c)^2)'; startPoints = [fff_gauss.a fff_gauss.b fff_gauss.c];
-    fff_gauss = fit(snrPoint(tmpL:tmpR)',estDiff_gauss(tmpL:tmpR),gaussEqn, 'Start', startPoints);
+    fff_gauss = fit(snrPoint(tmpL:tmpR)', estY(tmpL:tmpR), gaussEqn, 'Start', startPoints);
     
-    estDiff_gauss = fff_gauss(snrPoint); estDiff = estDiff_gauss; fff = fff_gauss;
+    estY = fff_gauss(snrPoint); estDiff = estY; fff = fff_gauss;
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     gaussEqn = 'a*exp(-((x-b)/c)^2)'; startPoints = [0.1 (filterSnr(idxL) + filterSnr(idxR))/2 0.25];
-%     fff_gauss = fit(filterSnr(idxL:idxR)',diffVal(idxL:idxR)',gaussEqn, 'Start', startPoints);
-%     estDiff_gauss = fff_gauss(filterSnr); estDiff_gauss = estDiff_gauss ./ sum(estDiff_gauss);
-%     gaussEqn = 'a*exp(-((x-b)/c)^2)'; startPoints = [fff_gauss.a fff_gauss.b fff_gauss.c];
-%     fff_gauss = fit(filterSnr(idxL:idxR)',estDiff_gauss(idxL:idxR),gaussEqn, 'Start', startPoints);
-%     newEqn = 'a+b*(c/(10^(x/10))-x)'; startPoints = [-30 5 -db2pow(fff_gauss.b + pow2db(10/log(10)))];
-%     fff_new = fit(filterSnr(idxL:idxR)',log(diffVal(idxL:idxR)'), newEqn, 'Start', startPoints);
-%     estDiff_new = exp(fff_new(filterSnr));
-%     estDiff = estDiff_new ./ sum(estDiff_new); fff = fff_new;
+    %%%%%%%%%%%%%%%%%%%%%%%%%% New Method %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    deltaXXX = min(max(tmpX) - fff.b, fff.b - min(tmpX)); x0 = fff.b; x1 = x0 + deltaXXX;
+    y0 = fff(x0); y1 = fff(x1); yy0 = db2pow(-x0) * exp(-db2pow(fff.b - x0)); yy1 = db2pow(-x1) * exp(-db2pow(fff.b - x1));
+    tmpC = log(y0 / y1) / log(yy0 / yy1); tmpB = fff.b; 
     
+    testNList = tmpC/4:1:tmpC*2; testBList = tmpB-0.5:0.001:tmpB+0.5; minErr = 1e10; ccc = 0; bbb = 0;
+    for iii = 1:size(testNList,2)
+        for jjj = 1:size(testBList,2)
+            tmpYY = db2pow(-tmpX) .* exp(-db2pow(testBList(jjj)-tmpX)); tmpYY = tmpYY ./ max(tmpYY); tmpYY = tmpYY .^ testNList(iii);
+            tmpYY = tmpYY / sum(tmpYY); tmpYY = tmpYY * sum(tmpY);
+            tmpV = std(tmpY - tmpYY);
+            if tmpV < minErr
+                minErr = tmpV; ccc = testNList(iii); bbb = testBList(jjj);
+            end
+        end
+    end
+    
+    tmpYY = db2pow(-snrPoint) .* exp(-db2pow(bbb-snrPoint)); tmpYY = tmpYY ./ max(tmpYY); tmpYY = tmpYY .^ ccc;
+    tmpYY = tmpYY / sum(tmpYY); estDiff = tmpYY';
+    figure(showFigure+3); hold on; grid on;
+    plot(snrPoint, tmpYY);
+
+   
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     estBlerCurve = zeros(1, size(estDiff, 1)); estBlerCurve(1) = 1;
     for idx = 2:size(estDiff,1)
         estBlerCurve(idx) = estBlerCurve(idx-1) - estDiff(idx);
     end
     A = fff.a; B = fff.b; C = fff.c;
+    tmpIdx = 1 + (idxS-1:idxE-1) * floor((snrdB_List(2)-snrdB_List(1)) / (snrPoint(2) - snrPoint(1)));
+    stdErr = std(theBlerCurve(idxS:idxE) - estBlerCurve(tmpIdx));
     
     if showFigure > 0
-        
         figure(showFigure); hold on; grid on;
-        tmpIdx = 1 + (0:size(snrdB_List,2)-1) * floor((snrdB_List(2)-snrdB_List(1)) / (snrPoint(2) - snrPoint(1)));
-        plot(snrdB_List, theBlerCurve - estBlerCurve(tmpIdx), '.-');
+        plot(snrdB_List(idxS:idxE), theBlerCurve(idxS:idxE) - estBlerCurve(tmpIdx), '.-');
         
         figure(showFigure+1); hold on; grid on;
-        tmpIdx = 1 + (idxL-1:idxR-1) * floor((filterSnr(2)-filterSnr(1)) / (snrPoint(2) - snrPoint(1)));
-        plot(filterSnr(idxL:idxR), diffVal(idxL:idxR), '*');
-        plot(filterSnr(idxL:idxR), estDiff(tmpIdx)*floor((filterSnr(2)-filterSnr(1)) / (snrPoint(2) - snrPoint(1))), '--');   
+        plot(tmpX, tmpY, '.'); plot(tmpX, estBlerCurve(tmpIdx(1:end-1)) - estBlerCurve(tmpIdx(2:end)), '--');
+        
+        tmpYY = db2pow(-tmpX) .* exp(-db2pow(bbb-tmpX));
+        tmpYY = tmpYY ./ max(tmpYY); tmpYY = tmpYY .^ ccc;
+        plot(tmpX, tmpYY * sum(tmpY) / sum(tmpYY), ':');
     end
 end
 

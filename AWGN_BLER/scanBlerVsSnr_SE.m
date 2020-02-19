@@ -24,7 +24,8 @@
 
 %%
 clear all;
-testPRB_list = [10];
+
+testPRB_list = [5, 10, 20, 50, 100];
 for nPrbIdx = 1:size(testPRB_list,2)
     load("SINRMidPoint.mat"); assert(size(SINRMidPoint, 2) == 43);
     nPrb = testPRB_list(nPrbIdx); tmpIII = find(nPrb >= nPRB_list, 1, 'last');
@@ -36,29 +37,29 @@ for nPrbIdx = 1:size(testPRB_list,2)
         tic
         [tbBlerCurve, cbBlerCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, find(snrdB_List > SINRMidPoint(tmpIII, seIdx), 1));
         tbBlerMatrix(seIdx, :) = tbBlerCurve; cbBlerMatrix(seIdx, :) = cbBlerCurve;
-        save("TTTblerMat"+theMod+"_PRB"+nPrb, "tbBlerMatrix", "cbBlerMatrix", "snrdB_List", "nPrb");
+        save("blerMat"+theMod+"_PRB"+nPrb, "tbBlerMatrix", "cbBlerMatrix", "snrdB_List", "nPrb");
         toc
     end
 
-%     theMod = "16QAM"; seStart = 17; seEnd = 23; ddd = 0.01; snrdB_List = -15:ddd:30;
-%     tbBlerMatrix = zeros(43, size(snrdB_List,2)); cbBlerMatrix = zeros(43, size(snrdB_List,2));
-%     for seIdx = seStart:seEnd
-%         tic
-%         [tbBlerCurve, cbBlerCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, find(snrdB_List > SINRMidPoint(tmpIII, seIdx), 1));
-%         tbBlerMatrix(seIdx, :) = tbBlerCurve; cbBlerMatrix(seIdx, :) = cbBlerCurve;
-%         save("blerMat"+theMod+"_PRB"+nPrb, "tbBlerMatrix", "cbBlerMatrix", "snrdB_List", "nPrb");
-%         toc
-%     end
-% 
-%     theMod = "64QAM"; seStart = 24; seEnd = 35; ddd = 0.01; snrdB_List = -15:ddd:30;
-%     tbBlerMatrix = zeros(43, size(snrdB_List,2)); cbBlerMatrix = zeros(43, size(snrdB_List,2));
-%     for seIdx = seStart:seEnd
-%         tic
-%         [tbBlerCurve, cbBlerCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, find(snrdB_List > SINRMidPoint(tmpIII, seIdx), 1));
-%         tbBlerMatrix(seIdx, :) = tbBlerCurve; cbBlerMatrix(seIdx, :) = cbBlerCurve;
-%         save("blerMat"+theMod+"_PRB"+nPrb, "tbBlerMatrix", "cbBlerMatrix", "snrdB_List", "nPrb");
-%         toc
-%     end
+    theMod = "16QAM"; seStart = 17; seEnd = 23; ddd = 0.01; snrdB_List = -15:ddd:30;
+    tbBlerMatrix = zeros(43, size(snrdB_List,2)); cbBlerMatrix = zeros(43, size(snrdB_List,2));
+    for seIdx = seStart:seEnd
+        tic
+        [tbBlerCurve, cbBlerCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, find(snrdB_List > SINRMidPoint(tmpIII, seIdx), 1));
+        tbBlerMatrix(seIdx, :) = tbBlerCurve; cbBlerMatrix(seIdx, :) = cbBlerCurve;
+        save("blerMat"+theMod+"_PRB"+nPrb, "tbBlerMatrix", "cbBlerMatrix", "snrdB_List", "nPrb");
+        toc
+    end
+
+    theMod = "64QAM"; seStart = 24; seEnd = 35; ddd = 0.01; snrdB_List = -15:ddd:30;
+    tbBlerMatrix = zeros(43, size(snrdB_List,2)); cbBlerMatrix = zeros(43, size(snrdB_List,2));
+    for seIdx = seStart:seEnd
+        tic
+        [tbBlerCurve, cbBlerCurve] = CalBlerCurve(seIdx, nPrb, snrdB_List, find(snrdB_List > SINRMidPoint(tmpIII, seIdx), 1));
+        tbBlerMatrix(seIdx, :) = tbBlerCurve; cbBlerMatrix(seIdx, :) = cbBlerCurve;
+        save("blerMat"+theMod+"_PRB"+nPrb, "tbBlerMatrix", "cbBlerMatrix", "snrdB_List", "nPrb");
+        toc
+    end
 end
 
 
