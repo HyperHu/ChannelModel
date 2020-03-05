@@ -19,7 +19,9 @@ function [theTbBler, theCbBler] = calBler(mcsIdx, nPrb, nSymbol, snrdB, nSample)
         setTransportBlock(encDL,randi([0 1],trBlkLen,1,'int8'));
         codedTrBlock = encDL(pdsch.Modulation, pdsch.NLayers, outlen, 0);
         txSoftBits = nrSymbolModulate(codedTrBlock, pdsch.Modulation);
-        
+
+%         channelScale = norm(randn(1,2)); txSoftBits = channelScale * txSoftBits;
+
         noiseBits = (randn(size(txSoftBits)) + 1i * randn(size(txSoftBits))) .* db2mag(-(snrdB+3));
         rxSoftBits = nrSymbolDemodulate(txSoftBits + noiseBits, pdsch.Modulation, db2pow(-snrdB));
         [~, nacked, cbNacked] = decDL(rxSoftBits, pdsch.Modulation, pdsch.NLayers, 0);
