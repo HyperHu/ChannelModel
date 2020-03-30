@@ -13,15 +13,15 @@
 % plot(blerEst, 3*estErr ./ blerEst);
 
 %%
-% clear all;
-% 
-% theBler = 0.001;
-% nSample = 500;
-% nTest = 100000;
-% tmpV = rand(nSample, nTest);
-% estBler = sum(tmpV < theBler, 1) ./ nSample;
-% mean(estBler)
-% histogram(estBler);
+clear all;
+
+theBler = 0.5;
+nSample = 1000*5;
+nTest = 10000;
+tmpV = rand(nSample, nTest);
+estBler = sum(tmpV < theBler, 1) ./ nSample;
+(max(estBler) - min(estBler))
+histfit(estBler);
 
 %%
 % clear all;
@@ -48,11 +48,11 @@
 
 
 %%
-clear all;
-snrdB_List = -15:0.01:-5;
-c_dot = -db2pow(-10.92 + pow2db(10/log(10)));
-tmpY = exp(c_dot ./ (10 .^ (snrdB_List / 10)) - snrdB_List); x0 = -10*log10(-10/(log(10)*c_dot));
-b = 4.5; tmpY = tmpY / max(tmpY); tmpY = tmpY .^ b; tmpY = 0.087 * tmpY;
-tmpC = -db2pow(x0 + pow2db(10/log(10)));
-figure(3); hold on; grid on;
-plot(snrdB_List, tmpY); plot(x0*ones(1,22), max(tmpY)*(0:21)/20, '--');
+% clear all;
+% snrdB_List = -15:0.01:-5;
+% c_dot = -db2pow(-10.92 + pow2db(10/log(10)));
+% tmpY = exp(c_dot ./ (10 .^ (snrdB_List / 10)) - snrdB_List); x0 = -10*log10(-10/(log(10)*c_dot));
+% b = 4.5; tmpY = tmpY / max(tmpY); tmpY = tmpY .^ b; tmpY = 0.087 * tmpY;
+% tmpC = -db2pow(x0 + pow2db(10/log(10)));
+% figure(3); hold on; grid on;
+% plot(snrdB_List, tmpY); plot(x0*ones(1,22), max(tmpY)*(0:21)/20, '--');

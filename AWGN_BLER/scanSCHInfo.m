@@ -1,10 +1,78 @@
 %%
 clear all;
+addpath(pwd + "\Utility");
 load("TablesIn3GPP.mat");
+global TargetCodeRate_Table BitsPerSymbol_Table ModulationOrder_Table;
+
+% nSymbol = 12;
+% nPRB_list = 1:256;
+
+% selectSet_bgn1_ncb1 = {};
+% for seIdx = 1:43
+%     selectPRB = [];
+%     for prbIdx = 1:size(nPRB_list, 2)
+%         [theTbSize, bgn, nCb, effCodeRate, k_dot] = CalSchInfo(seIdx, nPRB_list(prbIdx), nSymbol);
+%         if bgn == 1 && nCb == 1
+%             selectPRB = [selectPRB nPRB_list(prbIdx)];
+%         end
+%     end
+%     selectSet_bgn1_ncb1{seIdx} = selectPRB;
+% end
+% 
+% 
+% selectSet_bgn1_ncb2 = {};
+% for seIdx = 1:43
+%     selectPRB = [];
+%     for prbIdx = 1:size(nPRB_list, 2)
+%         [theTbSize, bgn, nCb, effCodeRate, k_dot] = CalSchInfo(seIdx, nPRB_list(prbIdx), nSymbol);
+%         if bgn == 1 && nCb == 2
+%             selectPRB = [selectPRB nPRB_list(prbIdx)];
+%         end
+%     end
+%     selectSet_bgn1_ncb2{seIdx} = selectPRB;
+% end
+% 
+% selectSet_bgn1_ncb3 = {};
+% for seIdx = 1:43
+%     selectPRB = [];
+%     for prbIdx = 1:size(nPRB_list, 2)
+%         [theTbSize, bgn, nCb, effCodeRate, k_dot] = CalSchInfo(seIdx, nPRB_list(prbIdx), nSymbol);
+%         if bgn == 1 && nCb == 3
+%             selectPRB = [selectPRB nPRB_list(prbIdx)];
+%         end
+%     end
+%     selectSet_bgn1_ncb3{seIdx} = selectPRB;
+% end
+% 
+% selectSet_bgn2_ncb1 = {};
+% for seIdx = 1:43
+%     selectPRB = [];
+%     for prbIdx = 1:size(nPRB_list, 2)
+%         [theTbSize, bgn, nCb, effCodeRate, k_dot] = CalSchInfo(seIdx, nPRB_list(prbIdx), nSymbol);
+%         if bgn == 2 && nCb == 1
+%             selectPRB = [selectPRB nPRB_list(prbIdx)];
+%         end
+%     end
+%     selectSet_bgn2_ncb1{seIdx} = selectPRB;
+% end
+% 
+% 
+% selectSet_bgn2_ncb2 = {};
+% for seIdx = 1:43
+%     selectPRB = [];
+%     for prbIdx = 1:size(nPRB_list, 2)
+%         [theTbSize, bgn, nCb, effCodeRate, k_dot] = CalSchInfo(seIdx, nPRB_list(prbIdx), nSymbol);
+%         if bgn == 2 && nCb == 2
+%             selectPRB = [selectPRB nPRB_list(prbIdx)];
+%         end
+%     end
+%     selectSet_bgn2_ncb2{seIdx} = selectPRB;
+% end
+
 
 nSymbol = 12;
 %nPRB_list = [5, 10, 20, 50, 100];
-nPRB_list = 5:5:256;
+nPRB_list = 1:256;
 
 SpectralEfficiency_Table_size = size(TargetCodeRate_Table, 2);
 PRB_List_size = size(nPRB_list, 2);
@@ -25,31 +93,31 @@ for idxI = 1:SpectralEfficiency_Table_size
         ttt(idxI, idxJ) = BitsPerSymbol_Table(idxI);
     end
 end
-
-xxx = reshape(realCodeRate, 1, []); yyy = reshape(k_dotMat, 1, []);
-zzz1 = reshape((ttt == 2) .* (numCbMat == 1), 1, []);
-cftool(xxx, yyy, zzz1);
-
-
-%%
-% figure(); mesh(nPRB_list, SpectralEfficiency_Table, tbSizeMat);
-% figure(); mesh(nPRB_list, SpectralEfficiency_Table, bgnMat);
-% figure(); mesh(nPRB_list, SpectralEfficiency_Table, numCbMat);
-% figure(); mesh(nPRB_list, SpectralEfficiency_Table, realCodeRate);
-% figure(); mesh(nPRB_list, SpectralEfficiency_Table, k_dotMat);
-
-% %%
-% nnnn = 12;
-% figure(1); plot(nPRB_list, numCbMat(nnnn,:), '*-'); grid on; hold on;
-% figure(2); plot(nPRB_list, nRE(nnnn, :) ./ numCbMat(nnnn,:), '*-'); grid on; hold on;
+% 
+% xxx = reshape(realCodeRate, 1, []); yyy = reshape(k_dotMat, 1, []);
+% zzz1 = reshape((ttt == 2) .* (numCbMat == 1), 1, []);
+% cftool(xxx, yyy, zzz1);
+% 
 % 
 % %%
-% ppp = 10;
-% figure(20); plot(SpectralEfficiency_Table, numCbMat(:, ppp), '*-'); grid on; hold on;
-% figure(21); plot(SpectralEfficiency_Table, nRE(:, ppp) ./ numCbMat(:, ppp), '*-'); grid on; hold on;
+% % figure(); mesh(nPRB_list, SpectralEfficiency_Table, tbSizeMat);
+% % figure(); mesh(nPRB_list, SpectralEfficiency_Table, bgnMat);
+% % figure(); mesh(nPRB_list, SpectralEfficiency_Table, numCbMat);
+% % figure(); mesh(nPRB_list, SpectralEfficiency_Table, realCodeRate);
+% % figure(); mesh(nPRB_list, SpectralEfficiency_Table, k_dotMat);
+% 
+% % %%
+% % nnnn = 12;
+% % figure(1); plot(nPRB_list, numCbMat(nnnn,:), '*-'); grid on; hold on;
+% % figure(2); plot(nPRB_list, nRE(nnnn, :) ./ numCbMat(nnnn,:), '*-'); grid on; hold on;
+% % 
+% % %%
+% % ppp = 10;
+% % figure(20); plot(SpectralEfficiency_Table, numCbMat(:, ppp), '*-'); grid on; hold on;
+% % figure(21); plot(SpectralEfficiency_Table, nRE(:, ppp) ./ numCbMat(:, ppp), '*-'); grid on; hold on;
 
 function [theTbSize, bgn, nCb, effCodeRate, k_dot] = CalSchInfo(seIdx, nPrb, nSymbol)
-    load("TablesIn3GPP.mat", 'TargetCodeRate_Table', 'BitsPerSymbol_Table', 'ModulationOrder_Table');
+    global TargetCodeRate_Table BitsPerSymbol_Table ModulationOrder_Table;    
     pdsch = struct(); pdsch.NLayers = 1;
     pdsch.PRBSet = 0:nPrb - 1; pdsch.nPrb = nPrb; pdsch.nSymbol = nSymbol;
     pdsch.TargetCodeRate = TargetCodeRate_Table(seIdx) / 1024;
