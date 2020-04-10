@@ -1,3 +1,50 @@
+%% test X,Y Range: [-4.3 3.3] x [5.3 13.2] for (1:43)(1:273)(1:14)
+clear all; addpath(pwd + "\Utility");
+xList = -4.4:0.01:3.4; yList = 5.2:0.01:13.3;
+tmpCnt = zeros(size(xList,2), size(yList,2));
+tmpCnt_1 = zeros(size(xList,2), size(yList,2));
+tmpCnt_2 = zeros(size(xList,2), size(yList,2));
+testSeList = 1:43; testPrbList = 1:273; testSymList = 1:14;
+load("Utility\TablesIn3GPP.mat");
+for idxSe = 1:size(testSeList,2)
+    disp(idxSe);
+    for idxPrb = 1:size(testPrbList,2)
+        for idxSym = 1:size(testSymList,2)
+            
+            seIdx = testSeList(idxSe); nPrb = testPrbList(idxPrb); nSymbol = testSymList(idxSym);
+            pdsch = struct(); pdsch.NLayers = 1;
+            pdsch.PRBSet = 0:nPrb - 1; pdsch.nPrb = nPrb; pdsch.nSymbol = nSymbol;
+            pdsch.TargetCodeRate = TargetCodeRate_Table(seIdx) / 1024;
+            pdsch.Modulation = ModulationOrder_Table{seIdx};
+            pdsch.BitsPerSymbol = BitsPerSymbol_Table(seIdx);
+            
+            theTbSize = hPDSCHTBS(pdsch, 12*pdsch.nSymbol);
+            tmpInfo = nrDLSCHInfo(theTbSize, pdsch.TargetCodeRate);
+            bgn = tmpInfo.BGN; nCb = tmpInfo.C;
+            effCodeRate = theTbSize + tmpInfo.L + (tmpInfo.C * tmpInfo.Lcb);
+            effCR = effCodeRate / (12 * nSymbol * nPrb * pdsch.BitsPerSymbol * pdsch.NLayers);
+            k_dot = (theTbSize + tmpInfo.L + (tmpInfo.C * tmpInfo.Lcb)) / nCb;
+
+            tmpX = log2(effCR*BitsPerSymbol_Table(idxSe)); tmpY = log2(k_dot);
+            idxX = find(xList>tmpX,1); idxY = find(yList>tmpY,1);
+            tmpCnt(idxX,idxY) = tmpCnt(idxX,idxY) + 1;
+            if bgn == 1
+                tmpCnt_1(idxX,idxY) = tmpCnt_1(idxX,idxY) + 1;
+            else
+                tmpCnt_2(idxX,idxY) = tmpCnt_2(idxX,idxY) + 1;
+            end
+        end
+    end
+end
+
+ttt = sum(tmpCnt,2);
+minX = xList(find(ttt>0,1) - 1); maxX = xList(find(ttt>0, 1, 'last') + 1);
+ttt = sum(tmpCnt,1);
+minY = yList(find(ttt>0,1) - 1); maxY = yList(find(ttt>0, 1, 'last') + 1);
+figure(); mesh(xList, yList, tmpCnt'>0);
+figure(); mesh(xList, yList, tmpCnt_1'>0);
+figure(); mesh(xList, yList, tmpCnt_2'>0);
+
 %%
 % clear all;
 % N = 20000;
@@ -13,15 +60,15 @@
 % plot(blerEst, 3*estErr ./ blerEst);
 
 %%
-clear all;
-
-theBler = 0.5;
-nSample = 1000*5;
-nTest = 10000;
-tmpV = rand(nSample, nTest);
-estBler = sum(tmpV < theBler, 1) ./ nSample;
-(max(estBler) - min(estBler))
-histfit(estBler);
+% clear all;
+% 
+% theBler = 0.5;
+% nSample = 1000*5;
+% nTest = 10000;
+% tmpV = rand(nSample, nTest);
+% estBler = sum(tmpV < theBler, 1) ./ nSample;
+% (max(estBler) - min(estBler))
+% histfit(estBler);
 
 %%
 % clear all;
