@@ -1,5 +1,5 @@
 function [theB, theC, theErr, estBler, snrPoint] = FitOneBlerCurve(snrSet, blerSet, theMethod, showFigure)
-    theMargin = 0.05;
+    theMargin = 0.01;
     idxS = find(blerSet < (1-theMargin), 1, 'first'); idxE = find(blerSet > (0+theMargin), 1, 'last');
     [estMu, estSigma] = CoarseFit(snrSet(idxS:idxE), blerSet(idxS:idxE));
     
@@ -31,7 +31,11 @@ function [theB, theC, theErr, estBler, snrPoint] = FitOneBlerCurve(snrSet, blerS
         plot(snrSet(idxS:idxE), blerSet(idxS:idxE) - estBler(tmpIdx), 'x-');
         
         figure(showFigure+2); hold on; grid on;
-        plot((snrSet(idxS:idxE) - theB) / (3*theC), blerSet(idxS:idxE) - estBler(tmpIdx), '.');
+        plot((snrSet(idxS:idxE) - snrSet(idxS)) / (snrSet(idxE) - snrSet(idxS)) - 1,...
+             blerSet(idxS:idxE) - estBler(tmpIdx), '.');
+        %figure(showFigure+4); hold on; grid on;
+        %tmpX = (snrSet(idxS:idxE) - theB) / (3*theC); tmpY = 0.0821*(tmpX.^2) - 0.00137*tmpX - 0.002756;
+        %plot((snrSet(idxS:idxE) - theB) / (3*theC), blerSet(idxS:idxE) - (estBler(tmpIdx)+tmpY), '.');
         
         figure(showFigure+3); hold on; grid on;
         plot(snrSet(idxS+1:idxE), blerSet(idxS:idxE-1)-blerSet(idxS+1:idxE), '.');
@@ -60,22 +64,23 @@ function [theB, theC, estBler] = fitMethod_1(estMu, estSigma, snrPoint)
 end
 
 function [theB, theC, estBler] = fitMethod_2(estMu, estSigma, snrPoint, tmpX, tmpY)
-    assert(false);
+    tmpXDiff = tmpX(2:end); tmpYDiff = tmpY(1:end-1) - tmpY(2:end);
     estBler = zeros(size(snrPoint)); estBler(1) = 1;    
     x0 = estMu; x1 = x0 + min(max(tmpX) - estMu, estMu - min(tmpX));
     y0 = 1; y1 = exp(-((x1-estMu)/estSigma)^2);
     yy0 = db2pow(-x0) * exp(-db2pow(estMu - x0)); yy1 = db2pow(-x1) * exp(-db2pow(estMu - x1));
     tmpC = log(y0 / y1) / log(yy0 / yy1); tmpB = estMu;
     
-    testNList = tmpC/4:1:tmpC*4; testBList = tmpB-0.5:0.005:tmpB+0.5;
-    minErr = 1e50; ccc = 0; bbb = 0;
+    testNList = tmpC/10:1:tmpC*4; testBList = tmpB-0.5:0.001:tmpB+0.5;
+    minErr = 1e50; ccc = 0; bbb = 0; tmpMMM = zeros(size(testNList,2), size(testBList,2));
     for iii = 1:size(testNList,2)
         for jjj = 1:size(testBList,2)
-            tmpYY = db2pow(-tmpX) .* exp(-db2pow(testBList(jjj)-tmpX));
+            tmpYY = db2pow(-tmpXDiff) .* exp(-db2pow(testBList(jjj)-tmpXDiff));
             tmpYY = tmpYY ./ max(tmpYY); tmpYY = tmpYY .^ testNList(iii);
-            tmpYY = tmpYY / sum(tmpYY); tmpYY = tmpYY * sum(tmpY);
-            tmpV = mean((tmpY - tmpYY) .^ 2);
+            tmpYY = tmpYY / sum(tmpYY); tmpYY = tmpYY * sum(tmpYDiff);
+            tmpV = mean((tmpYDiff - tmpYY) .^ 2);
             %tmpV = std(tmpY - tmpYY);
+            tmpMMM(iii,jjj) = tmpV;
             if tmpV < minErr
                 minErr = tmpV; ccc = testNList(iii); bbb = testBList(jjj);
             end
@@ -115,8 +120,9 @@ function [theB, theC, estBler] = fitMethod_3(estMu, estSigma, snrPoint, tmpX, tm
 end
 
 function [theB, theC, estBler] = fitMethod_4(estMu, estSigma, snrPoint, tmpX, tmpY)
-    assert(false);
-    newEqn = '1/(1 + exp(-a*x - b))'; startPoints = [-45 16];
+    newEqn = '1/(1 + exp(-a*x - b))';
+    startPoints = [log(10)/(db2pow(estMu) - db2pow(estMu+estSigma))...
+                   db2pow(estMu)*log(10)/(db2pow(estMu+estSigma) - db2pow(estMu))];
     newFunc = fit(db2pow(tmpX)', tmpY', newEqn, 'Start', startPoints);
     theB = newFunc.a; theC = newFunc.b;
     estBler = newFunc(db2pow(snrPoint))';

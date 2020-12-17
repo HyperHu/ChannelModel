@@ -1,7 +1,5 @@
 function [subFrameDuration, subCarriarSpace, numSymbolPerSubFrame, ...
           sampleRate, nCP_List_subFrame] = calCommonPar(mu, nFFT)
-%CALCOMMONPAR 此处显示有关此函数的摘要
-%   此处显示详细说明
 
 subFrameDuration = 1e-3;    % 1ms
 subCarriarSpace = (15 * 1e3) * (2 ^ mu);

@@ -30,7 +30,8 @@ end
 
 fileNameList = ["AlignWith5GMAX\blerMatQPSK_PRB8_SYM9.mat"...
                 "AlignWith5GMAX\blerMatQPSK_PRB16_SYM9.mat"...
-                "AlignWith5GMAX\blerMatQPSK_PRB16_SYM10.mat"];
+                "AlignWith5GMAX\blerMatQPSK_PRB16_SYM10.mat"...
+                "AlignWith5GMAX\blerMatQPSK_PRB32_SYM9.mat"];
 for fileIdx = 1:size(fileNameList, 2)
     theFileName = "SampleData\" + fileNameList(fileIdx);
     load(theFileName, 'snrdB_List', 'nPrb', 'nSymbol', 'cbBlerMatrix', 'tbBlerMatrix');
@@ -128,7 +129,8 @@ end
 
 fileNameList = ["AlignWith5GMAX\blerMat16QAM_PRB8_SYM9.mat"...
                 "AlignWith5GMAX\blerMat16QAM_PRB16_SYM9.mat"...
-                "AlignWith5GMAX\blerMat16QAM_PRB16_SYM10.mat"];
+                "AlignWith5GMAX\blerMat16QAM_PRB16_SYM10.mat"...
+                "AlignWith5GMAX\blerMat16QAM_PRB32_SYM9.mat"];
 for fileIdx = 1:size(fileNameList, 2)
     theFileName = "SampleData\" + fileNameList(fileIdx);
     load(theFileName, 'snrdB_List', 'nPrb', 'nSymbol', 'cbBlerMatrix', 'tbBlerMatrix');
@@ -204,7 +206,8 @@ end
 
 fileNameList = ["AlignWith5GMAX\blerMat64QAM_PRB8_SYM9.mat"...
                 "AlignWith5GMAX\blerMat64QAM_PRB16_SYM9.mat"...
-                "AlignWith5GMAX\blerMat64QAM_PRB16_SYM10.mat"];
+                "AlignWith5GMAX\blerMat64QAM_PRB16_SYM10.mat"...
+                "AlignWith5GMAX\blerMat64QAM_PRB32_SYM9.mat"];
 for fileIdx = 1:size(fileNameList, 2)
     theFileName = "SampleData\" + fileNameList(fileIdx);
     load(theFileName, 'snrdB_List', 'nPrb', 'nSymbol', 'cbBlerMatrix', 'tbBlerMatrix');
