@@ -1,86 +1,115 @@
-%% Parameters Set
+%% test GenCorrelateRandomGrid
 clear all;
 
-scenario = 'RMa';
-Fc_Hz = 3*1e9;
-hUT_meter = 1.5;
-hBS_meter = 35;
+areaSize = 1000; % In meter.
+sampleStep = 5;   % In meter.
 
+% In order  [SF, K, DS, ASD, ASA, ZSD, ZSA]
+corrDist = [10, 15, 7, 8, 8, 12, 12]';  % In meter.
+corrMatrix = [1.0 	0.5 	-0.4 	-0.5 	-0.4 	0.0 	0.0 
+              0.5 	1.0 	-0.7 	-0.2 	-0.3 	0.0 	0.0 
+              -0.4 	-0.7	1.0 	0.5 	0.8 	0.0 	0.2 
+              -0.5 	-0.2 	0.5 	1.0 	0.4 	0.5 	0.3 
+              -0.4 	-0.3 	0.8 	0.4 	1.0 	0.0 	0.0 
+              0.0 	0.0 	0.0 	0.5 	0.0 	1.0 	0.0 
+              0.0 	0.0 	0.2 	0.3 	0.0 	0.0 	1.0 ];
 
-intersiteDistance = 5000;
-particle_meter = intersiteDistance/100;
-
-sitePosition = [0,    0;
-                1,    0;
-                0.5,  sqrt(3)/2;
-                -0.5, sqrt(3)/2;
-                -1,   0;
-                -0.5, -sqrt(3)/2;
-                0.5,  -sqrt(3)/2] * intersiteDistance;
-
-
-
+[gridPos, randomValues] = GenCorrelateRandomGrid(areaSize, sampleStep, corrDist, corrMatrix);
 
 %%
-[gridX, gridY] = BuildCoordinateGrid(sitePosition, particle_meter, ...
-                                     intersiteDistance, true);
-localGridSet = cell(size(sitePosition, 1), 1);
-for siteIdx = 1:size(sitePosition, 1)
-    [localGridX, localGridY] = BuildCoordinateGrid([0 0], particle_meter, intersiteDistance, true);
-    localGridSet{siteIdx} = {localGridX, localGridY};
-end
+% In Order: [DS, ASD, ASA, SF, K, ZSA, ZSD]
+correlation_matrix_zero = [1 0.5 0.8 -0.4 -0.7 0.2 0;...
+          0.5 1 0.4 -0.5 -0.2 0.3 0.5;...
+          0.8 0.4 1 -0.4 -0.3 0 0;...
+          -0.4 -0.5 -0.4 1 0.5 0 0;...
+          -0.7 -0.2 -0.3 0.5 1 0 0;...
+          0.2 0.3 0 0 0 1 0;...
+          0 0.5 0 0 0 0 1];
+        correlation_distance = [7;8;8;10;15;12;12];
 
-%% Step 2:
-% Assgin Indoor/Outdoor status.
-indoorStatusMap = zeros(size(gridX, 2), size(gridY, 2));
-
-% Assign LOS/NLOS status for each site.
-losStatusMap = cell(size(sitePosition, 1), 1);
-for siteIdx = 1:size(sitePosition, 1)
-    tmpGridX = localGridSet{siteIdx}{1};
-    tmpGridY = localGridSet{siteIdx}{2};
-    localLosMap = zeros(size(tmpGridX, 2), size(tmpGridY, 2));
-    losStatusMap{siteIdx} = localLosMap;
-end
-
-%% Step 3: Calculate pathloss.
-% Basic pathloss.
-basicPathlossMap = cell(size(sitePosition, 1), 1);
-for siteIdx = 1:size(sitePosition, 1)
-    tmpGridX = localGridSet{siteIdx}{1};
-    tmpGridY = localGridSet{siteIdx}{2};
-    deltaIdxX = 0;
-    deltaIdxY = 0;
-    pathLossCalculator_LOS = GenPathLoss(scenario, true, Fc_Hz, hUT_meter, hBS_meter);
-    pathLossCalculator_NLOS = GenPathLoss(scenario, false, Fc_Hz, hUT_meter, hBS_meter);
-    
-    localPlMap = zeros(size(tmpGridX, 2), size(tmpGridY, 2));
-    for idxI = 1:size(localPlMap, 1)
-        for idxJ = 1:size(localPlMap, 2)
-            d3D = sqrt(tmpGridX(idxI)^2 + tmpGridY(idxJ)^2 + (hBS_meter - hUT_meter)^2);
-            if (losStatusMap{siteIdx}(idxI, idxJ) == 0) || (indoorStatusMap(idxI+deltaIdxX, idxJ+deltaIdxY) == 1)
-                tmpPl = pathLossCalculator_NLOS(d3D);
-            else
-                tmpPl = pathLossCalculator_LOS(d3D);
-            end
-            localPlMap(idxI, idxJ) = tmpPl;
-        end
-    end
-    basicPathlossMap{siteIdx} = localPlMap;
-end
-
-% O2I penetration loss
-penetrationLossMap = cell(size(sitePosition, 1), 1);
-for siteIdx = 1:size(sitePosition, 1)
-    tmpGridX = localGridSet{siteIdx}{1};
-    tmpGridY = localGridSet{siteIdx}{2};
-    penetrationLossMap{siteIdx} = zeros(size(tmpGridX, 2), size(tmpGridY, 2));
-end
-
-totalLossMap = cell(size(sitePosition, 1), 1);
-for siteIdx = 1:size(sitePosition, 1)
-    totalLossMap{siteIdx} = basicPathlossMap{siteIdx} + penetrationLossMap{siteIdx};
-end
+% %% Parameters Set
+% clear all;
+% 
+% scenario = 'RMa';
+% Fc_Hz = 3*1e9;
+% hUT_meter = 1.5;
+% hBS_meter = 35;
+% 
+% 
+% intersiteDistance = 5000;
+% particle_meter = intersiteDistance/100;
+% 
+% sitePosition = [0,    0;
+%                 1,    0;
+%                 0.5,  sqrt(3)/2;
+%                 -0.5, sqrt(3)/2;
+%                 -1,   0;
+%                 -0.5, -sqrt(3)/2;
+%                 0.5,  -sqrt(3)/2] * intersiteDistance;
+% 
+% 
+% 
+% 
+% %%
+% [gridX, gridY] = BuildCoordinateGrid(sitePosition, particle_meter, ...
+%                                      intersiteDistance, true);
+% localGridSet = cell(size(sitePosition, 1), 1);
+% for siteIdx = 1:size(sitePosition, 1)
+%     [localGridX, localGridY] = BuildCoordinateGrid([0 0], particle_meter, intersiteDistance, true);
+%     localGridSet{siteIdx} = {localGridX, localGridY};
+% end
+% 
+% %% Step 2:
+% % Assgin Indoor/Outdoor status.
+% indoorStatusMap = zeros(size(gridX, 2), size(gridY, 2));
+% 
+% % Assign LOS/NLOS status for each site.
+% losStatusMap = cell(size(sitePosition, 1), 1);
+% for siteIdx = 1:size(sitePosition, 1)
+%     tmpGridX = localGridSet{siteIdx}{1};
+%     tmpGridY = localGridSet{siteIdx}{2};
+%     localLosMap = zeros(size(tmpGridX, 2), size(tmpGridY, 2));
+%     losStatusMap{siteIdx} = localLosMap;
+% end
+% 
+% %% Step 3: Calculate pathloss.
+% % Basic pathloss.
+% basicPathlossMap = cell(size(sitePosition, 1), 1);
+% for siteIdx = 1:size(sitePosition, 1)
+%     tmpGridX = localGridSet{siteIdx}{1};
+%     tmpGridY = localGridSet{siteIdx}{2};
+%     deltaIdxX = 0;
+%     deltaIdxY = 0;
+%     pathLossCalculator_LOS = GenPathLoss(scenario, true, Fc_Hz, hUT_meter, hBS_meter);
+%     pathLossCalculator_NLOS = GenPathLoss(scenario, false, Fc_Hz, hUT_meter, hBS_meter);
+%     
+%     localPlMap = zeros(size(tmpGridX, 2), size(tmpGridY, 2));
+%     for idxI = 1:size(localPlMap, 1)
+%         for idxJ = 1:size(localPlMap, 2)
+%             d3D = sqrt(tmpGridX(idxI)^2 + tmpGridY(idxJ)^2 + (hBS_meter - hUT_meter)^2);
+%             if (losStatusMap{siteIdx}(idxI, idxJ) == 0) || (indoorStatusMap(idxI+deltaIdxX, idxJ+deltaIdxY) == 1)
+%                 tmpPl = pathLossCalculator_NLOS(d3D);
+%             else
+%                 tmpPl = pathLossCalculator_LOS(d3D);
+%             end
+%             localPlMap(idxI, idxJ) = tmpPl;
+%         end
+%     end
+%     basicPathlossMap{siteIdx} = localPlMap;
+% end
+% 
+% % O2I penetration loss
+% penetrationLossMap = cell(size(sitePosition, 1), 1);
+% for siteIdx = 1:size(sitePosition, 1)
+%     tmpGridX = localGridSet{siteIdx}{1};
+%     tmpGridY = localGridSet{siteIdx}{2};
+%     penetrationLossMap{siteIdx} = zeros(size(tmpGridX, 2), size(tmpGridY, 2));
+% end
+% 
+% totalLossMap = cell(size(sitePosition, 1), 1);
+% for siteIdx = 1:size(sitePosition, 1)
+%     totalLossMap{siteIdx} = basicPathlossMap{siteIdx} + penetrationLossMap{siteIdx};
+% end
 
 %% Step 4: Generate large scale parameters.
 

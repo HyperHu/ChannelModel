@@ -1,11 +1,8 @@
 %%
-clear all;
+clearvars; addpath(pwd + "\Utility");
 
-seIdx = 12; nSymbol = 12;
-testPRB_list = [38, 41, 47, 53, 59, 65, 71, 77, ...
-                80, 92, 104, 116, 128, 140, 152, ...
-                192, 222, ...
-                251];
+seIdx = 33; nSymbol = 10;
+testPRB_list = [4];
 
 snrdB_List = -15:0.01:30;
 tbBlerMatrix = zeros(size(testPRB_list,2), size(snrdB_List,2));

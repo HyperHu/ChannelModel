@@ -8,9 +8,9 @@ load("UniformedFormulaFunction.mat");
 % load('SampleData\ConstErr\blerMat16QAM_PRB50.mat')
 % load('SampleData\ConstErr\blerMat64QAM_PRB50.mat')
 
-% load('SampleData\DynErr\blerMatQPSK_PRB10.mat')
+load('SampleData\DynErr\blerMatQPSK_PRB10.mat')
 % load('SampleData\DynErr\blerMat16QAM_PRB50.mat')
-load('SampleData\DynErr\blerMat256QAM_PRB10.mat')
+% load('SampleData\DynErr\blerMat256QAM_PRB10.mat')
 
 % load('result_backup\blerMat16QAM_PRB50.mat'); cbBlerMatrix = blerMatrix;
 

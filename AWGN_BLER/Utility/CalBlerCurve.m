@@ -1,5 +1,5 @@
 function [blerCurve, cbBlerCurve] = CalBlerCurve(seIdx, nPrb, nSymbol, snrdB_List, midIdx)
-    thT = 0.05; blerCurve = zeros(size(snrdB_List)); cbBlerCurve = zeros(size(snrdB_List));
+    thT = 0.25; blerCurve = zeros(size(snrdB_List)); cbBlerCurve = zeros(size(snrdB_List));
 
     tmpIdx = midIdx;
     while true
