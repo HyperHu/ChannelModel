@@ -1,50 +1,31 @@
 % %
-clear all;
+%clear all;
 clearvars;
 
-modMethod = "QPSK"; targetRc = double(0.75);
-numLay = int32(1); numPrb = int32(16); numRe = double(12*12);
-nid = int32(1); rnti = int32(1);
-nSamples = 1000;
-
-snrValList1 = 4.0:0.1:6.0; blerList1 = zeros(size(snrValList1));
-for idx = 1:size(snrValList1,2)
-    snrVal = snrValList1(idx);
-    theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, ...
-                       snrVal, nSamples, 1);
-    disp("SNR: " + snrVal + ", BLER: " + theBler);
-    blerList1(idx) = theBler;
-end
-
-snrValList2 = 0.0:0.1:2.0; blerList2 = zeros(size(snrValList2));
-for idx = 1:size(snrValList2,2)
-    snrVal = snrValList2(idx);
-    theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, ...
-                       snrVal, nSamples, 2);
-    disp("SNR: " + snrVal + ", BLER: " + theBler);
-    blerList2(idx) = theBler;
-end
-
-snrValList3 = -1.0:0.1:1.0; blerList3 = zeros(size(snrValList3));
-for idx = 1:size(snrValList3,2)
-    snrVal = snrValList3(idx);
-    theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, ...
-                       snrVal, nSamples, 3);
-    disp("SNR: " + snrVal + ", BLER: " + theBler);
-    blerList3(idx) = theBler;
-end
-
-snrValList4 = -2.0:0.1:0.0; blerList4 = zeros(size(snrValList4));
-for idx = 1:size(snrValList4,2)
-    snrVal = snrValList4(idx);
-    theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, ...
-                       snrVal, nSamples, 4);
-    disp("SNR: " + snrVal + ", BLER: " + theBler);
-    blerList4(idx) = theBler;
-end
+snrValList = 28:0.1:32;
+blerList1 = doTesting(snrValList, 1, "Belief propagation");
+blerList2 = doTesting(snrValList, 2, "Belief propagation");
+blerList3 = doTesting(snrValList, 3, "Belief propagation");
+blerList4 = doTesting(snrValList, 4, "Belief propagation");
 
 figure(1); hold on; grid on;
-plot(snrValList1, blerList1, '-*');
-plot(snrValList2, blerList2, '-x');
-plot(snrValList3, blerList3, '-<');
-plot(snrValList4, blerList4, '->');
+plot(snrValList, blerList1, '-*');
+plot(snrValList, blerList2, '-x');
+plot(snrValList, blerList3, '-<');
+plot(snrValList, blerList4, '->');
+
+
+function blerList = doTesting(snrValList, numDec, algo)
+    modMethod = "256QAM"; targetRc = double(0.85);
+    numLay = int32(1); numPrb = int32(32); numRe = double(12*12);
+    nid = int32(1); rnti = int32(1); nSamples = 2000;
+
+    blerList = zeros(size(snrValList));
+    for idx = 1:size(snrValList,2)
+        snrVal = snrValList(idx);
+        theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, ...
+                           snrVal, nSamples, numDec, 15, algo);
+        disp("SNR: " + snrVal + ", BLER: " + theBler);
+        blerList(idx) = theBler;
+    end
+end

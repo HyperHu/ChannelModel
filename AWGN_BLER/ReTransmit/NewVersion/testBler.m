@@ -1,4 +1,5 @@
-function theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, snrVal, nSample, nDec)
+function theBler = testBler(nid, rnti, modMethod, targetRc, numLay, numPrb, numRe, ...
+                            snrVal, nSample, nDec, numIter, algo)
 
 if modMethod == "QPSK"
     theQm = 2;
@@ -35,13 +36,13 @@ for idx = 1:nSample
         estLaySym = throughBlockAwgnChannel(theLaySym, ones(numLay, numPrb) ./ db2pow(snrVal));
 
         %% LLR Decoding. size same as CW. Type: double
-        dlschLLRs = doLlrDecoding(nid, rnti, modMethod, estLaySym);
+        dlschLLRs = doLlrDecoding(nid, rnti, modMethod, estLaySym, db2pow(-snrVal));
 
         %% Rate Recovery. Max codedbits: :30000 x :200. Type: double
         raterecovered = doRateRecoverLDPC(theTbSize, targetRc, modMethod, numLay, rv, dlschLLRs);
 
         harqBuffer = harqBuffer + raterecovered;
-        isAcked = doLdpcDecoding(theTbSize, targetRc, harqBuffer);
+        isAcked = doLdpcDecoding(theTbSize, targetRc, harqBuffer, numIter, algo);
         if isAcked
             break;
         end

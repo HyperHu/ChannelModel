@@ -8,5 +8,7 @@ theAmp = kron(ones(1, nSym), kron(sqrt(blockNoise ./ 2), ones(1,12)));
 estLaySym = randn(size(theLaySym)) + 1i*randn(size(theLaySym));
 estLaySym = estLaySym .* theAmp;
 estLaySym = estLaySym + theLaySym;
+%theAmpNorm = kron(ones(1, nSym), kron(sqrt(1 ./ (blockNoise + 1)), ones(1,12)));
+%estLaySym = estLaySym .* theAmpNorm;
 end
 
