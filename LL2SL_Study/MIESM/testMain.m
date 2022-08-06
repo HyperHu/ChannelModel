@@ -2,23 +2,51 @@
 clearvars;
 
 %%
-% modMethod = "16QAM"; targetRc = 0.25; numLay = 1; numPrb = 16; numRe = 144;
-% fadingMu = [0;]; fadingSig = [0;]; aveSnrList = 1.0:0.1:3.0;
-% nSample = 10; nTest = 1000; skipRange = [1.8, 2.7];
 
-modMethod = "256QAM"; targetRc = 0.8; numLay = 1; numPrb = 8; numRe = 144;
-fadingMu = [0;]; fadingSig = [6;]; aveSnrList = 19:0.1:25;
-nSample = 5; nTest = 20; skipRange = [20, 22];
+% modMethod = "256QAM"; targetRc = 0.8; numLay = 1; numPrb = 8; numRe = 144;
+% aveSnrList = 19:0.1:25; nSample = 20; nTest = 500; skipRange = [20, 23];
 
+modMethod = "64QAM"; targetRc = 0.5; numLay = 2; numPrb = 16; numRe = 144;
+%aveSnrList = 8.0:0.1:15.0; nSample = 1; nTest = 50; skipRange = [9.5, 11.5];
+aveSnrList = 10.0:0.1:11.0; nSample = 1; nTest = 500; skipRange = [9.5, 11.5];
+
+% modMethod = "16QAM"; targetRc = 0.25; numLay = 1; numPrb = 64; numRe = 144;
+% aveSnrList = 1.0:0.1:6.0; nSample = 20; nTest = 500; skipRange = [1.7, 2.7];
+
+allEffSNR = {}; allBlerSample = {}; allDiff = {};
+
+testSig = [2, 4, 6, 8, 10, 15];
+plotColor = ["b", "g", "r", "c", "m", "y"];
+for sigIdx = 1:6
+fadingMu = [0;]; fadingSig = [testSig(sigIdx);];
 [effSNRList, blerSampleList, diffList] = GenBlerSamples(modMethod, targetRc, numLay, numPrb, numRe, ...
                                                         fadingMu, fadingSig, aveSnrList, nSample, nTest, skipRange);
 
-figure(1); hold on; grid on;
-%plot(effSNRList, blerSampleList, 'r*');
-plot3(effSNRList, diffList(:,1), blerSampleList, 'r*');
+figure(1); hold on; grid on; plot3(effSNRList, diffList(:,1), blerSampleList, plotColor(sigIdx)+"*");
+figure(2); hold on; grid on; plot3(effSNRList, diffList(:,2), blerSampleList, plotColor(sigIdx)+"*");
+allEffSNR{sigIdx} = effSNRList; allBlerSample{sigIdx} = blerSampleList; allDiff{sigIdx} = diffList;
+end
 
-figure(2); hold on; grid on;
-plot3(effSNRList, diffList(:,2), blerSampleList, 'r*');
+%%
+clear all;
+%load("16QAM_p25.mat");
+%load("16QAM_p25_NonScal.mat");
+%load("16QAM_p25_CB4.mat");
+%load("256QAM_p8.mat");
+%load("256QAM_p8_DiffMu.mat");
+load("256QAM_p68.mat");
+%load("64QAM_p5_DiffMu.mat");
+%load("64QAM_p5.mat");
+
+totalX = []; totalY = []; totalZ = [];
+for sigIdx = 1:6
+figure(3); hold on; grid on;
+plot3(allEffSNR{sigIdx}, allDiff{sigIdx}(:,1), allBlerSample{sigIdx}, plotColor(sigIdx)+"o");
+figure(4); hold on; grid on;
+plot3(allEffSNR{sigIdx}, allDiff{sigIdx}(:,2), allBlerSample{sigIdx}, plotColor(sigIdx)+"o");
+
+totalX = [totalX; allEffSNR{sigIdx}]; totalY = [totalY; allDiff{sigIdx}(:,2)]; totalZ = [totalZ; allBlerSample{sigIdx}];
+end
 
 %% 
 % x1 = effSNRList - 20; y1 = 1 - blerSampleList;

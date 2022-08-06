@@ -26,7 +26,8 @@ function [effSNR, theBLER] = CalMIBvsBLER(modMethod, targetRc, numLay, numPrb, n
         theLaySym = genLayersSymbol(1, 2, modMethod, numLay, theCodeWord);
         estLaySym = throughBlockAwgnChannel(theLaySym, db2pow(-blockSnr));
 
-        dlschLLRs = doLlrDecoding(1, 2, modMethod, estLaySym, mean(db2pow(-blockSnr), 'all'));
+        %dlschLLRs = doLlrDecoding(1, 2, modMethod, estLaySym, mean(db2pow(-blockSnr), 'all'));
+        dlschLLRs = doLlrDecoding(1, 2, modMethod, estLaySym, db2pow(-blockSnr));
         
         %
         thePrbCsi = mean(db2pow(-blockSnr), 'all') ./ db2pow(-blockSnr);
