@@ -142,7 +142,10 @@ cftool(snrSamples(1:62), pow2db(mi16QAMSamples(1:62)));  % y = 0.9984x + 0.5671
 %%
 clear all;
 load("MutualInformation.mat");
-load("n30_p40_10m.mat"); load("n30_p40_1m.mat");
+load("n30_p40_10m.mat");
+%load("n30_p40_1m.mat");
+%load("n50_n30_100m.mat");
+%load("MyCalculation_New.mat");
 
 figure(1); hold on; grid on;
 plot(snrTable, log10(miTable_BPSK)); plot(MutualInformation(:,1), log10(MutualInformation(:,2)), '--');
