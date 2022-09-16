@@ -3,7 +3,7 @@ clear all;
 addpath(pwd + "\Utility");
 
 %% Load data
-makeNewRawData = true; showFigure = 1; theFitMode = 4;
+makeNewRawData = false; showFigure = 1; theFitMode = 4;
 if (makeNewRawData == true)
     load("4QAMSampleSet.mat");
     effCodeRate_4QAM = zeros(size(seIdxSetAll)); allK_dot_4QAM = zeros(size(seIdxSetAll));
@@ -107,7 +107,7 @@ end
 makeNewFit = false;
 if makeNewFit == true
     xList = -4.3:0.01:3.3; yList = 5.3:0.01:13.2;
-    %% QPSK
+    % QPSK
     tmpIdx = find(bgn_4QAM > 0);
 %     xData = log2(realSpectralEff_4QAM(tmpIdx)); yData = log2(allK_dot_4QAM(tmpIdx)); checkMu = muSINR_4QAM(tmpIdx);
     xData = 2.^(realSpectralEff_4QAM(tmpIdx)); yData = log2(allK_dot_4QAM(tmpIdx)); checkMu = db2pow(muSINR_4QAM(tmpIdx));
@@ -129,7 +129,7 @@ if makeNewFit == true
     [xGrid, yGrid] = meshgrid(xList, yList); estMuSinr = muSinrFunc(xGrid, yGrid);
     figure(1); hold on; grid on; mesh(xList, yList, estMuSinr); plot(muSinrFunc, [xData', yData'], checkMu');
     figure(2); hold on; grid on; plot3(2.^xData, 2.^yData, checkMu - muSinrFunc(xData,yData), '*');
-    %% 16QAM
+    % 16QAM
     tmpIdx = find(bgn_16QAM > 0);
     %xData = log2(realSpectralEff_16QAM(tmpIdx)); yData = log2(allK_dot_16QAM(tmpIdx)); checkMu = muSINR_16QAM(tmpIdx);
     xData = 2.^(realSpectralEff_16QAM(tmpIdx)); yData = log2(allK_dot_16QAM(tmpIdx)); checkMu = db2pow(muSINR_16QAM(tmpIdx));
@@ -243,15 +243,19 @@ end
 % checkSpecEff = realSpectralEff_4QAM; checkKdot = allK_dot_4QAM; checkBgn = bgn_4QAM;
 % checkMu = muSINR_4QAM; checkSigma = sigmadB_4QAM;
 % checkMuSinrFunc_1 = muSinrFunc_4QAM_BGN1; checkMuSinrFunc_2 = muSinrFunc_4QAM_BGN2;
+
 % checkSpecEff = realSpectralEff_16QAM; checkKdot = allK_dot_16QAM; checkBgn = bgn_16QAM;
 % checkMu = muSINR_16QAM; checkSigma = sigmadB_16QAM;
 % checkMuSinrFunc_1 = muSinrFunc_16QAM_BGN1; checkMuSinrFunc_2 = muSinrFunc_16QAM_BGN2;
-checkSpecEff = realSpectralEff_64QAM; checkKdot = allK_dot_64QAM; checkBgn = bgn_64QAM;
-checkMu = muSINR_64QAM; checkSigma = sigmadB_64QAM;
-checkMuSinrFunc_1 = muSinrFunc_64QAM_BGN1; checkMuSinrFunc_2 = muSinrFunc_64QAM_BGN2;
-% checkSpecEff = realSpectralEff_256QAM; checkKdot = allK_dot_256QAM; checkBgn = bgn_256QAM;
-% checkMu = muSINR_256QAM; checkSigma = sigmadB_256QAM;
-% checkMuSinrFunc_1 = muSinrFunc_256QAM_BGN1; checkMuSinrFunc_2 = muSinrFunc_256QAM_BGN2;
+
+% checkSpecEff = realSpectralEff_64QAM; checkKdot = allK_dot_64QAM; checkBgn = bgn_64QAM;
+% checkMu = muSINR_64QAM; checkSigma = sigmadB_64QAM;
+% checkMuSinrFunc_1 = muSinrFunc_64QAM_BGN1; checkMuSinrFunc_2 = muSinrFunc_64QAM_BGN2;
+
+checkSpecEff = realSpectralEff_256QAM; checkKdot = allK_dot_256QAM; checkBgn = bgn_256QAM;
+checkMu = muSINR_256QAM; checkSigma = sigmadB_256QAM;
+checkMuSinrFunc_1 = muSinrFunc_256QAM_BGN1; checkMuSinrFunc_2 = muSinrFunc_256QAM_BGN2;
+
 doChecking = true; ttttAAA = [];
 if doChecking == true
     snrTestList = -15:0.01:30; blerAveErr = zeros(size(checkSpecEff));
@@ -267,7 +271,8 @@ if doChecking == true
         blerAveErr(idx) = sqrt(mean((diffCurve(tmpIdx)).^2));
         
         figure(7); hold on; grid on;
-        plot((snrTestList(tmpIdx) - checkMu(idx)) / (3*checkSigma(idx)), diffCurve(tmpIdx), '.');
+        %plot((snrTestList(tmpIdx) - checkMu(idx)) / (3*checkSigma(idx)), diffCurve(tmpIdx), '.');
+        plot(snrTestList(tmpIdx), diffCurve(tmpIdx), '.');
     end
 %     ttttAAA = [ttttAAA blerAveErr];
     figure(5); hold on; grid on;
@@ -284,7 +289,7 @@ if doChecking == true
     plot(snrTestList, tmpCurve1, '--'); plot(snrTestList, tmpCurve2);
 end
 
-checkingFLag = true;
+checkingFLag = false;
 if checkingFLag == true
     showFigure = 6;
     %selectIdx = find(blerAveErr > 0.2);

@@ -29,21 +29,33 @@ end
 
 %%
 clear all;
+%load("16QAM_p25_AWGN.mat");
 %load("16QAM_p25.mat");
 %load("16QAM_p25_NonScal.mat");
+%load("16QAM_p25_SINR_NonCsiScal.mat");
+%load("16QAM_p25_SINR_CsiScal.mat");
 %load("16QAM_p25_CB4.mat");
+
 %load("256QAM_p8.mat");
 %load("256QAM_p8_DiffMu.mat");
-load("256QAM_p68.mat");
+%load("256QAM_p8_SINR_NonCsiScal.mat");
+%load("256QAM_p8_SINR_CsiScal.mat");
+%load("256QAM_p68.mat");
 %load("64QAM_p5_DiffMu.mat");
 %load("64QAM_p5.mat");
 
+%load("256QAM_p6663_4_16_144_n20_t500.mat");
+%load("256QAM_p6663_4_4_72_n40_t500.mat");
+
+%load("64QAM_p8883_4_16_144_n20_t500.mat");
+load("64QAM_p8883_4_4_72_n40_t500.mat");
+
 totalX = []; totalY = []; totalZ = [];
-for sigIdx = 1:6
-figure(3); hold on; grid on;
-plot3(allEffSNR{sigIdx}, allDiff{sigIdx}(:,1), allBlerSample{sigIdx}, plotColor(sigIdx)+"o");
-figure(4); hold on; grid on;
-plot3(allEffSNR{sigIdx}, allDiff{sigIdx}(:,2), allBlerSample{sigIdx}, plotColor(sigIdx)+"o");
+for sigIdx = 1:3
+figure(5); hold on; grid on;
+plot3(allEffSNR{sigIdx}, allDiff{sigIdx}(:,1), allBlerSample{sigIdx}, plotColor(sigIdx)+"*");
+figure(6); hold on; grid on;
+plot3(allEffSNR{sigIdx}, allDiff{sigIdx}(:,2), allBlerSample{sigIdx}, plotColor(sigIdx)+"*");
 
 totalX = [totalX; allEffSNR{sigIdx}]; totalY = [totalY; allDiff{sigIdx}(:,2)]; totalZ = [totalZ; allBlerSample{sigIdx}];
 end
